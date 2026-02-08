@@ -14,12 +14,18 @@ importers:
       '@astrojs/tailwind':
         specifier: ^6.0.2
         version: 6.0.2(astro@5.17.1(@types/node@25.2.2)(jiti@1.21.7)(rollup@4.57.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
+      '@lucide/astro':
+        specifier: ^0.563.0
+        version: 0.563.0(astro@5.17.1(@types/node@25.2.2)(jiti@1.21.7)(rollup@4.57.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
       astro:
         specifier: ^5.17.1
         version: 5.17.1(@types/node@25.2.2)(jiti@1.21.7)(rollup@4.57.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
+      lucide-astro:
+        specifier: ^0.556.0
+        version: 0.556.0(astro@5.17.1(@types/node@25.2.2)(jiti@1.21.7)(rollup@4.57.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -739,6 +745,11 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@lucide/astro@0.563.0':
+    resolution: {integrity: sha512-X9fNJvRR6pLJfkIEAFQkizWaNVvcduunJoFyR3fwPu30Y6jOu5S9k4k7HTSk3ZrEfqK2eFEqrBqqWH4fwSNKCg==}
+    peerDependencies:
+      astro: ^4 || ^5
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -1554,6 +1565,12 @@ packages:
 
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
+
+  lucide-astro@0.556.0:
+    resolution: {integrity: sha512-ugMjPb45AMfkLCaduNSbyy5NQEKvB1TxVVMmUS4S6L807PMESnX0Qp+DIKHjbyjJmPXOyLRbrzvR3YikTK7brg==}
+    deprecated: 'Deprecated: Use `@lucide/astro`'
+    peerDependencies:
+      astro: '>=2.7.1'
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -3061,6 +3078,10 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@lucide/astro@0.563.0(astro@5.17.1(@types/node@25.2.2)(jiti@1.21.7)(rollup@4.57.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))':
+    dependencies:
+      astro: 5.17.1(@types/node@25.2.2)(jiti@1.21.7)(rollup@4.57.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -3983,6 +4004,10 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
+
+  lucide-astro@0.556.0(astro@5.17.1(@types/node@25.2.2)(jiti@1.21.7)(rollup@4.57.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)):
+    dependencies:
+      astro: 5.17.1(@types/node@25.2.2)(jiti@1.21.7)(rollup@4.57.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
 
   magic-string@0.30.21:
     dependencies:

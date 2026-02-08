@@ -2,6 +2,7 @@
 import Layout from '../components/astro/Layout.astro';
 import GenreCard from '../components/astro/GenreCard.astro';
 import { getLibrary } from '../lib/musicData';
+import { Users, Album, Music } from '@lucide/astro';
 
 const library = getLibrary();
 const genres = library.genres;
@@ -11,11 +12,20 @@ const stats = library.stats;
 <Layout title="Music Library">
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-100">Music Library</h1>
-    <p class="mt-2 text-gray-400">
-      {stats.totalArtists.toLocaleString()} artists &middot;
-      {stats.totalAlbums.toLocaleString()} albums &middot;
-      {stats.totalGenres} genres
-    </p>
+    <div class="mt-4 flex flex-wrap gap-6 text-gray-400">
+      <div class="flex items-center gap-2">
+        <Users class="h-5 w-5 text-accent" />
+        <span>{stats.totalArtists.toLocaleString()} artists</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <Album class="h-5 w-5 text-accent" />
+        <span>{stats.totalAlbums.toLocaleString()} albums</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <Music class="h-5 w-5 text-accent" />
+        <span>{stats.totalGenres} genres</span>
+      </div>
+    </div>
   </div>
 
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

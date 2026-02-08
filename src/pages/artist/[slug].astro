@@ -3,6 +3,7 @@ import Layout from '../../components/astro/Layout.astro';
 import Breadcrumb from '../../components/astro/Breadcrumb.astro';
 import AlbumCard from '../../components/astro/AlbumCard.astro';
 import CountryFlag from '../../components/astro/CountryFlag.astro';
+import { Album, Disc3, Music, PenTool, Mic, Archive, GitBranch, Package } from '@lucide/astro';
 import { getAllArtists } from '../../lib/musicData';
 import { slugify } from '../../lib/slugify';
 
@@ -73,7 +74,8 @@ const albumsByType = {
 
   {albumsByType.main.length > 0 && (
     <section class="mb-8">
-      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
+        <Album class="h-5 w-5 text-accent" />
         Albums ({albumsByType.main.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -84,7 +86,8 @@ const albumsByType = {
 
   {albumsByType.eps.length > 0 && (
     <section class="mb-8">
-      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
+        <Disc3 class="h-5 w-5 text-accent" />
         EPs ({albumsByType.eps.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -95,7 +98,8 @@ const albumsByType = {
 
   {albumsByType.singles.length > 0 && (
     <section class="mb-8">
-      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
+        <Music class="h-5 w-5 text-accent" />
         Singles ({albumsByType.singles.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -106,7 +110,8 @@ const albumsByType = {
 
   {albumsByType.demos.length > 0 && (
     <section class="mb-8">
-      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
+        <PenTool class="h-5 w-5 text-accent" />
         Demos ({albumsByType.demos.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -117,7 +122,8 @@ const albumsByType = {
 
   {albumsByType.live.length > 0 && (
     <section class="mb-8">
-      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
+        <Mic class="h-5 w-5 text-accent" />
         Live ({albumsByType.live.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -128,7 +134,8 @@ const albumsByType = {
 
   {albumsByType.compilations.length > 0 && (
     <section class="mb-8">
-      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
+        <Archive class="h-5 w-5 text-accent" />
         Compilations ({albumsByType.compilations.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -139,7 +146,8 @@ const albumsByType = {
 
   {albumsByType.splits.length > 0 && (
     <section class="mb-8">
-      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
+        <GitBranch class="h-5 w-5 text-accent" />
         Splits ({albumsByType.splits.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -150,7 +158,8 @@ const albumsByType = {
 
   {albumsByType.other.length > 0 && (
     <section class="mb-8">
-      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
+        <Package class="h-5 w-5 text-accent" />
         Other ({albumsByType.other.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

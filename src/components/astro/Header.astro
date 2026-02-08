@@ -1,10 +1,12 @@
 ---
 import SearchTrigger from '../react/SearchTrigger';
+import { Music } from '@lucide/astro';
 ---
 
 <header class="sticky top-0 z-40 border-b border-surface-200 bg-surface/80 backdrop-blur-md">
   <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-    <a href="/" class="text-lg font-bold text-gray-100 hover:text-accent-light transition-colors">
+    <a href="/" class="flex items-center gap-2 text-lg font-bold text-gray-100 hover:text-accent-light transition-colors">
+      <Music class="h-6 w-6" />
       Music Library
     </a>
     <SearchTrigger client:idle />

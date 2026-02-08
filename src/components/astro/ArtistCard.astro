@@ -1,6 +1,7 @@
 ---
 import type { Artist } from '../../../scripts/types';
 import CountryFlag from './CountryFlag.astro';
+import { Mic, Album } from '@lucide/astro';
 
 interface Props {
   artist: Artist;
@@ -13,7 +14,8 @@ const { artist } = Astro.props;
   href={`/artist/${artist.slug}`}
   class="group flex items-center justify-between rounded-md border border-surface-200 bg-surface-50 px-4 py-3 transition-all hover:border-accent/50 hover:bg-surface-100"
 >
-  <div class="min-w-0 flex items-center">
+  <div class="min-w-0 flex items-center gap-2">
+    <Mic class="h-5 w-5 text-accent shrink-0" />
     <span class="font-medium text-gray-100 group-hover:text-accent-light transition-colors">
       {artist.name}
     </span>
@@ -29,7 +31,8 @@ const { artist } = Astro.props;
       </span>
     )}
   </div>
-  <span class="ml-4 shrink-0 text-sm text-gray-500">
-    {artist.albums.length} {artist.albums.length === 1 ? 'album' : 'albums'}
-  </span>
+  <div class="ml-4 shrink-0 flex items-center gap-1.5 text-sm text-gray-500">
+    <Album class="h-4 w-4" />
+    <span>{artist.albums.length} {artist.albums.length === 1 ? 'album' : 'albums'}</span>
+  </div>
 </a>
