@@ -1,0 +1,27 @@
+---
+interface Props {
+  isoCodes: string[];
+  country: string | null;
+  size?: number;
+}
+
+const { isoCodes, country, size = 20 } = Astro.props;
+
+const FLAG_BASE_URL = "https://hatscripts.github.io/circle-flags/flags";
+---
+
+{isoCodes.length > 0 && (
+  <span class="inline-flex items-center gap-1">
+    {isoCodes.map((iso) => (
+      <img
+        src={`${FLAG_BASE_URL}/${iso}.svg`}
+        alt={country ?? iso.toUpperCase()}
+        width={size}
+        height={size}
+        class="inline-block shrink-0 rounded-full"
+        loading="lazy"
+        decoding="async"
+      />
+    ))}
+  </span>
+)}

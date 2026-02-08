@@ -1,0 +1,24 @@
+---
+import Layout from '../components/astro/Layout.astro';
+import GenreCard from '../components/astro/GenreCard.astro';
+import { getLibrary } from '../lib/musicData';
+
+const library = getLibrary();
+const genres = library.genres;
+const stats = library.stats;
+---
+
+<Layout title="Music Library">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-100">Music Library</h1>
+    <p class="mt-2 text-gray-400">
+      {stats.totalArtists.toLocaleString()} artists &middot;
+      {stats.totalAlbums.toLocaleString()} albums &middot;
+      {stats.totalGenres} genres
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {genres.map((genre) => <GenreCard genre={genre} />)}
+  </div>
+</Layout>

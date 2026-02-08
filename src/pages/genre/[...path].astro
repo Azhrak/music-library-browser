@@ -1,0 +1,151 @@
+---
+import Layout from '../../components/astro/Layout.astro';
+import Breadcrumb from '../../components/astro/Breadcrumb.astro';
+import ArtistCard from '../../components/astro/ArtistCard.astro';
+import type { Subgenre } from '../../../scripts/types';
+import { getGenres, getSubgenreCounts } from '../../lib/musicData';
+import { slugify } from '../../lib/slugify';
+
+interface PathEntry {
+  params: { path: string };
+  props: {
+    name: string;
+    breadcrumb: { label: string; href?: string }[];
+    subgenres: Subgenre[];
+    artists: import('../../../scripts/types').Artist[];
+    compilations: import('../../../scripts/types').Compilation[];
+  };
+}
+
+export function getStaticPaths(): PathEntry[] {
+  const genres = getGenres();
+  const paths: PathEntry[] = [];
+
+  function addSubgenrePaths(
+    subgenres: Subgenre[],
+    slugPrefix: string[],
+    breadcrumb: { label: string; href?: string }[]
+  ) {
+    for (const sg of subgenres) {
+      const currentSlugs = [...slugPrefix, sg.slug];
+      const currentBreadcrumb = [
+        ...breadcrumb,
+        { label: sg.name },
+      ];
+
+      paths.push({
+        params: { path: currentSlugs.join('/') },
+        props: {
+          name: sg.name,
+          breadcrumb: currentBreadcrumb,
+          subgenres: sg.subgenres,
+          artists: sg.artists,
+          compilations: sg.compilations,
+        },
+      });
+
+      // Add href to this level's breadcrumb entry for children
+      const breadcrumbWithHref = [
+        ...breadcrumb,
+        { label: sg.name, href: `/genre/${currentSlugs.join('/')}` },
+      ];
+      addSubgenrePaths(sg.subgenres, currentSlugs, breadcrumbWithHref);
+    }
+  }
+
+  for (const genre of genres) {
+    // Genre root page
+    paths.push({
+      params: { path: genre.slug },
+      props: {
+        name: genre.name,
+        breadcrumb: [{ label: genre.name }],
+        subgenres: genre.subgenres,
+        artists: genre.artists,
+        compilations: genre.compilations,
+      },
+    });
+
+    // Subgenre pages
+    const genreBreadcrumb = [
+      { label: genre.name, href: `/genre/${genre.slug}` },
+    ];
+    addSubgenrePaths(genre.subgenres, [genre.slug], genreBreadcrumb);
+  }
+
+  return paths;
+}
+
+const { name, breadcrumb, subgenres, artists, compilations } = Astro.props;
+
+// Sort artists alphabetically
+const sortedArtists = [...artists].sort((a, b) =>
+  a.name.localeCompare(b.name)
+);
+---
+
+<Layout title={name}>
+  <Breadcrumb items={breadcrumb} />
+
+  <h1 class="mb-6 text-2xl font-bold text-gray-100">{name}</h1>
+
+  {subgenres.length > 0 && (
+    <section class="mb-8">
+      <h2 class="mb-4 text-lg font-semibold text-gray-300">Subgenres</h2>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {subgenres
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((sg) => {
+            const counts = getSubgenreCounts(sg);
+            const href = `/genre/${sg.fullPath.map((p) => slugify(p)).join('/')}`;
+            return (
+              <a
+                href={href}
+                class="group block rounded-lg border border-surface-200 bg-surface-50 p-4 transition-all hover:border-accent/50 hover:bg-surface-100"
+              >
+                <h3 class="font-medium text-gray-100 group-hover:text-accent-light transition-colors">
+                  {sg.name}
+                </h3>
+                <div class="mt-1 text-sm text-gray-400">
+                  {counts.artists} artists &middot; {counts.albums} albums
+                </div>
+              </a>
+            );
+          })}
+      </div>
+    </section>
+  )}
+
+  {sortedArtists.length > 0 && (
+    <section class="mb-8">
+      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+        Artists ({sortedArtists.length})
+      </h2>
+      <div class="grid grid-cols-1 gap-2">
+        {sortedArtists.map((artist) => (
+          <ArtistCard artist={artist} />
+        ))}
+      </div>
+    </section>
+  )}
+
+  {compilations.length > 0 && (
+    <section>
+      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+        Various Artists ({compilations.length})
+      </h2>
+      <div class="grid grid-cols-1 gap-2">
+        {compilations.map((comp) => (
+          <div class="rounded-md border border-surface-200 bg-surface-50 px-4 py-3">
+            <span class="font-medium text-gray-100">{comp.name}</span>
+            {comp.albums.length > 0 && (
+              <span class="ml-2 text-sm text-gray-500">
+                {comp.albums.length} {comp.albums.length === 1 ? 'release' : 'releases'}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+</Layout>

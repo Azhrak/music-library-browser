@@ -1,0 +1,161 @@
+---
+import Layout from '../../components/astro/Layout.astro';
+import Breadcrumb from '../../components/astro/Breadcrumb.astro';
+import AlbumCard from '../../components/astro/AlbumCard.astro';
+import CountryFlag from '../../components/astro/CountryFlag.astro';
+import { getAllArtists } from '../../lib/musicData';
+import { slugify } from '../../lib/slugify';
+
+export function getStaticPaths() {
+  const artists = getAllArtists();
+
+  return artists.map((artist) => ({
+    params: { slug: artist.slug },
+    props: { artist },
+  }));
+}
+
+const { artist } = Astro.props;
+
+const genreHref = `/genre/${artist.genrePath.map((p) => slugify(p)).join('/')}`;
+const genreLabel = artist.genrePath.join(' > ');
+
+const breadcrumb = [
+  { label: artist.genrePath[0], href: `/genre/${slugify(artist.genrePath[0])}` },
+  ...(artist.genrePath.length > 1
+    ? [{ label: genreLabel, href: genreHref }]
+    : []),
+  { label: artist.name },
+];
+
+// Group albums by type
+const albums = artist.albums;
+const albumsByType = {
+  main: albums.filter((a) => a.type === 'album'),
+  eps: albums.filter((a) => a.type === 'ep'),
+  singles: albums.filter((a) => a.type === 'single'),
+  demos: albums.filter((a) => a.type === 'demo'),
+  live: albums.filter((a) => a.type === 'live'),
+  compilations: albums.filter((a) => a.type === 'compilation'),
+  splits: albums.filter((a) => a.type === 'split'),
+  other: albums.filter((a) => a.type === 'other'),
+};
+---
+
+<Layout title={artist.name}>
+  <Breadcrumb items={breadcrumb} />
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-100">{artist.name}</h1>
+    <div class="mt-2 flex flex-wrap items-center gap-3 text-gray-400">
+      {artist.country && (
+        <span class="inline-flex items-center gap-2">
+          <CountryFlag isoCodes={artist.isoCodes} country={artist.country} size={20} />
+          {artist.country}
+        </span>
+      )}
+      {artist.tags.length > 0 && (
+        <span class="text-sm text-gray-500">({artist.tags.join(', ')})</span>
+      )}
+      <a href={genreHref} class="text-sm text-accent-light hover:underline">
+        {genreLabel}
+      </a>
+    </div>
+    <p class="mt-1 text-sm text-gray-500">
+      {albums.length} {albums.length === 1 ? 'release' : 'releases'}
+      {albums[0]?.year && albums[albums.length - 1]?.year && (
+        <span>
+          &middot; {albums[0].year}&ndash;{albums[albums.length - 1].year}
+        </span>
+      )}
+    </p>
+  </div>
+
+  {albumsByType.main.length > 0 && (
+    <section class="mb-8">
+      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+        Albums ({albumsByType.main.length})
+      </h2>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {albumsByType.main.map((album) => <AlbumCard album={album} />)}
+      </div>
+    </section>
+  )}
+
+  {albumsByType.eps.length > 0 && (
+    <section class="mb-8">
+      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+        EPs ({albumsByType.eps.length})
+      </h2>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {albumsByType.eps.map((album) => <AlbumCard album={album} />)}
+      </div>
+    </section>
+  )}
+
+  {albumsByType.singles.length > 0 && (
+    <section class="mb-8">
+      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+        Singles ({albumsByType.singles.length})
+      </h2>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {albumsByType.singles.map((album) => <AlbumCard album={album} />)}
+      </div>
+    </section>
+  )}
+
+  {albumsByType.demos.length > 0 && (
+    <section class="mb-8">
+      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+        Demos ({albumsByType.demos.length})
+      </h2>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {albumsByType.demos.map((album) => <AlbumCard album={album} />)}
+      </div>
+    </section>
+  )}
+
+  {albumsByType.live.length > 0 && (
+    <section class="mb-8">
+      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+        Live ({albumsByType.live.length})
+      </h2>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {albumsByType.live.map((album) => <AlbumCard album={album} />)}
+      </div>
+    </section>
+  )}
+
+  {albumsByType.compilations.length > 0 && (
+    <section class="mb-8">
+      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+        Compilations ({albumsByType.compilations.length})
+      </h2>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {albumsByType.compilations.map((album) => <AlbumCard album={album} />)}
+      </div>
+    </section>
+  )}
+
+  {albumsByType.splits.length > 0 && (
+    <section class="mb-8">
+      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+        Splits ({albumsByType.splits.length})
+      </h2>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {albumsByType.splits.map((album) => <AlbumCard album={album} />)}
+      </div>
+    </section>
+  )}
+
+  {albumsByType.other.length > 0 && (
+    <section class="mb-8">
+      <h2 class="mb-4 text-lg font-semibold text-gray-300">
+        Other ({albumsByType.other.length})
+      </h2>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {albumsByType.other.map((album) => <AlbumCard album={album} />)}
+      </div>
+    </section>
+  )}
+</Layout>
