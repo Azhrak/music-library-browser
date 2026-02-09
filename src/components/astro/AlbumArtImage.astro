@@ -1,0 +1,51 @@
+---
+import { ImageOff } from '@lucide/astro';
+
+interface Props {
+  src: string | null;
+  alt: string;
+  size: 'thumb' | 'medium';
+  class?: string;
+}
+
+const { src, alt, size, class: className } = Astro.props;
+
+const sizeClasses = {
+  thumb: 'w-16 h-16 sm:w-20 sm:h-20',
+  medium: 'w-full max-w-[500px] aspect-square',
+};
+
+const placeholderIconClasses = {
+  thumb: 'h-6 w-6',
+  medium: 'h-12 w-12',
+};
+
+const sizeClass = sizeClasses[size];
+const iconClass = placeholderIconClasses[size];
+---
+
+{src ? (
+  <img
+    src={src}
+    alt={alt}
+    class:list={[
+      'rounded-md object-cover',
+      sizeClass,
+      className,
+    ]}
+    loading="lazy"
+    decoding="async"
+  />
+) : (
+  <div
+    class:list={[
+      'rounded-md flex items-center justify-center bg-surface-100 border border-surface-200',
+      sizeClass,
+      className,
+    ]}
+    role="img"
+    aria-label={`No cover art for ${alt}`}
+  >
+    <ImageOff class:list={[iconClass, 'text-gray-600']} />
+  </div>
+)}

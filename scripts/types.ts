@@ -38,6 +38,7 @@ export interface Artist {
   tags: string[];
   genrePath: string[];
   albums: Album[];
+  rawFolderName: string;
 }
 
 export interface Compilation {
@@ -45,6 +46,7 @@ export interface Compilation {
   slug: string;
   genrePath: string[];
   albums: Album[];
+  rawFolderName: string;
 }
 
 export interface Album {

@@ -79,7 +79,7 @@ const albumsByType = {
         Albums ({albumsByType.main.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.main.map((album) => <AlbumCard album={album} />)}
+        {albumsByType.main.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
       </div>
     </section>
   )}
@@ -91,7 +91,7 @@ const albumsByType = {
         EPs ({albumsByType.eps.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.eps.map((album) => <AlbumCard album={album} />)}
+        {albumsByType.eps.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
       </div>
     </section>
   )}
@@ -103,7 +103,7 @@ const albumsByType = {
         Singles ({albumsByType.singles.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.singles.map((album) => <AlbumCard album={album} />)}
+        {albumsByType.singles.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
       </div>
     </section>
   )}
@@ -115,7 +115,7 @@ const albumsByType = {
         Demos ({albumsByType.demos.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.demos.map((album) => <AlbumCard album={album} />)}
+        {albumsByType.demos.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
       </div>
     </section>
   )}
@@ -127,7 +127,7 @@ const albumsByType = {
         Live ({albumsByType.live.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.live.map((album) => <AlbumCard album={album} />)}
+        {albumsByType.live.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
       </div>
     </section>
   )}
@@ -139,7 +139,7 @@ const albumsByType = {
         Compilations ({albumsByType.compilations.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.compilations.map((album) => <AlbumCard album={album} />)}
+        {albumsByType.compilations.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
       </div>
     </section>
   )}
@@ -151,7 +151,7 @@ const albumsByType = {
         Splits ({albumsByType.splits.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.splits.map((album) => <AlbumCard album={album} />)}
+        {albumsByType.splits.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
       </div>
     </section>
   )}
@@ -163,7 +163,7 @@ const albumsByType = {
         Other ({albumsByType.other.length})
       </h2>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.other.map((album) => <AlbumCard album={album} />)}
+        {albumsByType.other.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
       </div>
     </section>
   )}

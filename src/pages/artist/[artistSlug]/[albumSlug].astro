@@ -1,0 +1,135 @@
+---
+import Layout from '../../../components/astro/Layout.astro';
+import Breadcrumb from '../../../components/astro/Breadcrumb.astro';
+import AlbumArtImage from '../../../components/astro/AlbumArtImage.astro';
+import CountryFlag from '../../../components/astro/CountryFlag.astro';
+import { Album as AlbumIcon, Disc3, Music, PenTool, Mic, Archive, GitBranch, Package, ArrowLeft } from '@lucide/astro';
+import { getAllArtists } from '../../../lib/musicData';
+import { getAlbumArtUrls } from '../../../lib/albumArt';
+import { slugify } from '../../../lib/slugify';
+
+export function getStaticPaths() {
+  const artists = getAllArtists();
+  const paths = [];
+
+  for (const artist of artists) {
+    for (const album of artist.albums) {
+      if (!album.slug) continue;
+      paths.push({
+        params: {
+          artistSlug: artist.slug,
+          albumSlug: album.slug,
+        },
+        props: { artist, album },
+      });
+    }
+  }
+
+  return paths;
+}
+
+const { artist, album } = Astro.props;
+const artUrls = getAlbumArtUrls(artist.slug, album.slug);
+
+const genreHref = `/genre/${artist.genrePath.map((p) => slugify(p)).join('/')}`;
+const genreLabel = artist.genrePath.join(' > ');
+
+const breadcrumb = [
+  { label: artist.genrePath[0], href: `/genre/${slugify(artist.genrePath[0])}` },
+  ...(artist.genrePath.length > 1
+    ? [{ label: artist.genrePath[artist.genrePath.length - 1], href: genreHref }]
+    : []),
+  { label: artist.name, href: `/artist/${artist.slug}` },
+  { label: album.name },
+];
+
+const typeColors: Record<string, string> = {
+  album: 'bg-accent/20 text-accent-light',
+  ep: 'bg-emerald-500/20 text-emerald-400',
+  single: 'bg-amber-500/20 text-amber-400',
+  demo: 'bg-orange-500/20 text-orange-400',
+  live: 'bg-rose-500/20 text-rose-400',
+  compilation: 'bg-cyan-500/20 text-cyan-400',
+  split: 'bg-violet-500/20 text-violet-400',
+  other: 'bg-gray-500/20 text-gray-400',
+};
+
+const badgeClass = typeColors[album.type] ?? typeColors.other;
+
+const typeIcons: Record<string, any> = {
+  album: AlbumIcon,
+  ep: Disc3,
+  single: Music,
+  demo: PenTool,
+  live: Mic,
+  compilation: Archive,
+  split: GitBranch,
+  other: Package,
+};
+
+const TypeIcon = typeIcons[album.type] ?? typeIcons.other;
+---
+
+<Layout title={`${album.name} - ${artist.name}`}>
+  <Breadcrumb items={breadcrumb} />
+
+  <div class="mb-4">
+    <a href={`/artist/${artist.slug}`} class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-accent-light transition-colors">
+      <ArrowLeft class="h-4 w-4" />
+      Back to {artist.name}
+    </a>
+  </div>
+
+  <div class="flex flex-col sm:flex-row gap-6">
+    <div class="shrink-0">
+      <AlbumArtImage
+        src={artUrls?.medium ?? null}
+        alt={`${album.name} by ${artist.name}`}
+        size="medium"
+      />
+    </div>
+
+    <div>
+      <div class="flex items-start gap-2">
+        <TypeIcon class="h-6 w-6 text-accent shrink-0 mt-1" />
+        <h1 class="text-2xl font-bold text-gray-100">{album.name}</h1>
+      </div>
+
+      <p class="mt-2 text-lg text-gray-400">
+        <a href={`/artist/${artist.slug}`} class="hover:text-accent-light transition-colors">
+          {artist.name}
+        </a>
+      </p>
+
+      {artist.country && (
+        <div class="mt-1 flex items-center gap-2 text-sm text-gray-400">
+          <CountryFlag isoCodes={artist.isoCodes} country={artist.country} size={16} />
+          <span>{artist.country}</span>
+        </div>
+      )}
+
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        {album.year && <span class="text-lg text-gray-300">{album.year}</span>}
+        {album.type !== 'album' && (
+          <span class={`rounded px-2 py-0.5 text-xs font-medium ${badgeClass}`}>
+            {album.type.toUpperCase()}
+          </span>
+        )}
+        {album.reissue && (
+          <span class="rounded px-2 py-0.5 text-xs font-medium bg-yellow-500/20 text-yellow-400">
+            {album.reissue}
+          </span>
+        )}
+        {album.hasMultipleDiscs && (
+          <span class="text-sm text-gray-500">{album.discCount} discs</span>
+        )}
+      </div>
+
+      <div class="mt-3">
+        <a href={genreHref} class="text-sm text-accent-light hover:underline">
+          {genreLabel}
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

@@ -368,6 +368,7 @@ function walkHierarchy(
           tags: parsed.tags,
           genrePath: [...genrePath],
           albums,
+          rawFolderName: name,
         });
         break;
       }
@@ -383,6 +384,7 @@ function walkHierarchy(
           slug: uniqueSlug(cleanName || name, globalArtistSlugs),
           genrePath: [...genrePath],
           albums,
+          rawFolderName: name,
         });
         break;
       }
@@ -468,7 +470,7 @@ function buildSearchIndex(genres: Genre[]): SearchEntry[] {
         year: album.year,
         genrePath: artist.genrePath.join(" > "),
         slug: album.slug,
-        url: `/artist/${artist.slug}`,
+        url: `/artist/${artist.slug}/${album.slug}`,
       });
     }
   }
@@ -562,6 +564,16 @@ function main() {
   fs.mkdirSync(publicDir, { recursive: true });
   fs.writeFileSync(path.join(publicDir, "searchIndex.json"), searchIndexJson);
   console.log(`Wrote public/searchIndex.json`);
+
+  // Seed empty album art manifest if it doesn't exist (so Astro builds succeed before art processing)
+  const manifestPath = path.join(outputDir, "albumArtManifest.json");
+  if (!fs.existsSync(manifestPath)) {
+    fs.writeFileSync(
+      manifestPath,
+      JSON.stringify({ generatedAt: "", musicLibraryRoot: "", totalAlbums: 0, albumsWithArt: 0, albumsWithoutArt: 0, entries: {} }),
+    );
+    console.log("Created empty albumArtManifest.json (run 'pnpm art' to populate)");
+  }
 
   // Print stats
   console.log("\n--- Library Stats ---");
