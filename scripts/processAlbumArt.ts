@@ -87,16 +87,14 @@ async function processImage(
   outputDir: string,
   albumSlug: string,
 ): Promise<boolean> {
-  const thumbPath = path.join(outputDir, `${albumSlug}-thumb.webp`);
-  const mediumPath = path.join(outputDir, `${albumSlug}-medium.webp`);
+  const outPath = path.join(outputDir, `${albumSlug}.webp`);
 
-  // Idempotency: skip if both outputs exist and are newer than source
+  // Idempotency: skip if output exists and is newer than source
   try {
     const sourceStats = fs.statSync(sourcePath);
-    if (fs.existsSync(thumbPath) && fs.existsSync(mediumPath)) {
-      const thumbStats = fs.statSync(thumbPath);
-      const mediumStats = fs.statSync(mediumPath);
-      if (thumbStats.mtimeMs > sourceStats.mtimeMs && mediumStats.mtimeMs > sourceStats.mtimeMs) {
+    if (fs.existsSync(outPath)) {
+      const outStats = fs.statSync(outPath);
+      if (outStats.mtimeMs > sourceStats.mtimeMs) {
         return true;
       }
     }
@@ -116,17 +114,11 @@ async function processImage(
     return false;
   }
 
-  // Generate thumbnail (square, cover-crop)
+  // Generate single image (500x500, fit inside, preserve aspect ratio)
   await sharp(sourcePath)
-    .resize(ART_CONFIG.THUMB_SIZE, ART_CONFIG.THUMB_SIZE, { fit: "cover", position: "centre" })
+    .resize(ART_CONFIG.IMAGE_SIZE, ART_CONFIG.IMAGE_SIZE, { fit: "inside", withoutEnlargement: true })
     .webp({ quality: ART_CONFIG.WEBP_QUALITY })
-    .toFile(thumbPath);
-
-  // Generate medium (fit inside, preserve aspect ratio)
-  await sharp(sourcePath)
-    .resize(ART_CONFIG.MEDIUM_SIZE, ART_CONFIG.MEDIUM_SIZE, { fit: "inside", withoutEnlargement: true })
-    .webp({ quality: ART_CONFIG.WEBP_QUALITY })
-    .toFile(mediumPath);
+    .toFile(outPath);
 
   return true;
 }

@@ -2,7 +2,7 @@
 import type { Album } from '../../../scripts/types';
 import { Album as AlbumIcon, Disc3, Music, PenTool, Mic, Archive, GitBranch, Package } from '@lucide/astro';
 import AlbumArtImage from './AlbumArtImage.astro';
-import { getAlbumArtUrls } from '../../lib/albumArt';
+import { getAlbumArtUrl } from '../../lib/albumArt';
 
 interface Props {
   album: Album;
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const { album, artistSlug } = Astro.props;
-const artUrls = getAlbumArtUrls(artistSlug, album.slug);
+const artUrl = getAlbumArtUrl(artistSlug, album.slug);
 
 const typeColors: Record<string, string> = {
   album: 'bg-accent/20 text-accent-light',
@@ -46,7 +46,7 @@ const TypeIcon = typeIcons[album.type] ?? typeIcons.other;
   <div class="flex gap-3">
     <div class="shrink-0">
       <AlbumArtImage
-        src={artUrls?.thumb ?? null}
+        src={artUrl}
         alt={album.name}
         size="thumb"
       />

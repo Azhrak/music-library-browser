@@ -5,7 +5,7 @@ import AlbumArtImage from '../../../components/astro/AlbumArtImage.astro';
 import CountryFlag from '../../../components/astro/CountryFlag.astro';
 import { Album as AlbumIcon, Disc3, Music, PenTool, Mic, Archive, GitBranch, Package, ArrowLeft } from '@lucide/astro';
 import { getAllArtists } from '../../../lib/musicData';
-import { getAlbumArtUrls } from '../../../lib/albumArt';
+import { getAlbumArtUrl } from '../../../lib/albumArt';
 import { slugify } from '../../../lib/slugify';
 
 export function getStaticPaths() {
@@ -29,7 +29,7 @@ export function getStaticPaths() {
 }
 
 const { artist, album } = Astro.props;
-const artUrls = getAlbumArtUrls(artist.slug, album.slug);
+const artUrl = getAlbumArtUrl(artist.slug, album.slug);
 
 const genreHref = `/genre/${artist.genrePath.map((p) => slugify(p)).join('/')}`;
 const genreLabel = artist.genrePath.join(' > ');
@@ -83,7 +83,7 @@ const TypeIcon = typeIcons[album.type] ?? typeIcons.other;
   <div class="flex flex-col sm:flex-row gap-6">
     <div class="shrink-0">
       <AlbumArtImage
-        src={artUrls?.medium ?? null}
+        src={artUrl}
         alt={`${album.name} by ${artist.name}`}
         size="medium"
       />

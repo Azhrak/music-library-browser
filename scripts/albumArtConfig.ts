@@ -5,9 +5,8 @@ export const ART_CONFIG = {
   // Supported image extensions (case-insensitive)
   SUPPORTED_EXTENSIONS: [".jpg", ".jpeg", ".png", ".webp"],
 
-  // Output sizes
-  THUMB_SIZE: 200,
-  MEDIUM_SIZE: 500,
+  // Output size (single image per album, CSS controls display size)
+  IMAGE_SIZE: 500,
 
   // Quality settings (WebP)
   WEBP_QUALITY: 80,

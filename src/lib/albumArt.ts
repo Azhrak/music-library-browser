@@ -8,18 +8,15 @@ try {
   // No manifest yet — all albums will show placeholder
 }
 
-export function getAlbumArtUrls(
+export function getAlbumArtUrl(
   artistSlug: string,
   albumSlug: string,
-): { thumb: string; medium: string } | null {
+): string | null {
   const artistEntries = manifest.entries?.[artistSlug];
   if (!artistEntries) return null;
 
   const entry = artistEntries[albumSlug];
   if (!entry) return null;
 
-  return {
-    thumb: `/album-art/${artistSlug}/${albumSlug}-thumb.webp`,
-    medium: `/album-art/${artistSlug}/${albumSlug}-medium.webp`,
-  };
+  return `/album-art/${artistSlug}/${albumSlug}.webp`;
 }
