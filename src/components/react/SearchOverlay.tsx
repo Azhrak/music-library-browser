@@ -138,7 +138,7 @@ export default function SearchOverlay({ onClose }: Props) {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search artists, albums, genres..."
-            className="w-full bg-transparent px-3 py-4 text-gray-100 outline-none placeholder:text-gray-600"
+            className="w-full bg-transparent px-3 py-4 text-gray-100 outline-hidden placeholder:text-gray-600"
           />
           <kbd className="shrink-0 rounded bg-[#252525] px-2 py-1 text-xs text-gray-500">Esc</kbd>
         </div>

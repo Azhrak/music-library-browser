@@ -1,6 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #0f0f0f;
+  --color-surface-50: #1a1a1a;
+  --color-surface-100: #252525;
+  --color-surface-200: #333333;
+  --color-accent: #6366f1;
+  --color-accent-light: #818cf8;
+}
 
 @layer base {
   body {
