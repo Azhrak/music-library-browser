@@ -5,6 +5,7 @@
   "scripts": {
     "parse": "tsx scripts/generateMusicData.ts",
     "art": "tsx scripts/processAlbumArt.ts",
+    "spotify": "tsx scripts/fetchSpotifyArtists.ts",
     "dev": "pnpm parse && astro dev",
     "build": "pnpm parse && astro build",
     "preview": "astro preview",

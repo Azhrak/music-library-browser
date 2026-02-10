@@ -3,8 +3,10 @@ import Layout from '../../components/astro/Layout.astro';
 import Breadcrumb from '../../components/astro/Breadcrumb.astro';
 import AlbumCard from '../../components/astro/AlbumCard.astro';
 import CountryFlag from '../../components/astro/CountryFlag.astro';
+import ExternalLinks from '../../components/astro/ExternalLinks.astro';
 import { Album, Disc3, Music, PenTool, Mic, Archive, GitBranch, Package } from '@lucide/astro';
 import { getAllArtists } from '../../lib/musicData';
+import { getSpotifyArtistUrl } from '../../lib/spotify';
 import { slugify } from '../../lib/slugify';
 
 export function getStaticPaths() {
@@ -17,6 +19,7 @@ export function getStaticPaths() {
 }
 
 const { artist } = Astro.props;
+const spotifyDirectUrl = getSpotifyArtistUrl(artist.slug);
 
 const genreHref = `/genre/${artist.genrePath.map((p) => slugify(p)).join('/')}`;
 const genreLabel = artist.genrePath.join(' > ');
@@ -61,6 +64,9 @@ const albumsByType = {
       <a href={genreHref} class="text-sm text-accent-light hover:underline">
         {genreLabel}
       </a>
+    </div>
+    <div class="mt-2">
+      <ExternalLinks artistName={artist.name} spotifyDirectUrl={spotifyDirectUrl} />
     </div>
     <p class="mt-1 text-sm text-gray-500">
       {albums.length} {albums.length === 1 ? 'release' : 'releases'}
