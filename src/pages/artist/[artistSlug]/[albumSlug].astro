@@ -4,9 +4,11 @@ import Breadcrumb from '../../../components/astro/Breadcrumb.astro';
 import AlbumArtImage from '../../../components/astro/AlbumArtImage.astro';
 import CountryFlag from '../../../components/astro/CountryFlag.astro';
 import ExternalLinks from '../../../components/astro/ExternalLinks.astro';
+import TrackList from '../../../components/astro/TrackList.astro';
 import { Album as AlbumIcon, Disc3, Music, PenTool, Mic, Archive, GitBranch, Package, ArrowLeft } from '@lucide/astro';
 import { getAllArtists } from '../../../lib/musicData';
 import { getAlbumArtUrl } from '../../../lib/albumArt';
+import { getSpotifyAlbumData } from '../../../lib/spotifyAlbums';
 import { slugify } from '../../../lib/slugify';
 
 export function getStaticPaths() {
@@ -31,6 +33,7 @@ export function getStaticPaths() {
 
 const { artist, album } = Astro.props;
 const artUrl = getAlbumArtUrl(artist.slug, album.slug);
+const spotifyAlbumData = getSpotifyAlbumData(artist.slug, album.slug);
 
 const genreHref = `/genre/${artist.genrePath.map((p) => slugify(p)).join('/')}`;
 const genreLabel = artist.genrePath.join(' > ');
@@ -127,7 +130,7 @@ const TypeIcon = typeIcons[album.type] ?? typeIcons.other;
       </div>
 
       <div class="mt-4">
-        <ExternalLinks artistName={artist.name} albumName={album.name} year={album.year} />
+        <ExternalLinks artistName={artist.name} albumName={album.name} year={album.year} spotifyDirectUrl={spotifyAlbumData?.spotifyAlbumUrl} />
       </div>
 
       <div class="mt-3">
@@ -137,4 +140,6 @@ const TypeIcon = typeIcons[album.type] ?? typeIcons.other;
       </div>
     </div>
   </div>
+
+  {spotifyAlbumData && <TrackList albumData={spotifyAlbumData} />}
 </Layout>

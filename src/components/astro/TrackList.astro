@@ -1,0 +1,69 @@
+---
+import { Disc3 } from '@lucide/astro';
+import type { SpotifyAlbumEntry } from '../../lib/spotifyTypes';
+import { formatDuration } from '../../lib/spotifyAlbums';
+
+interface Props {
+  albumData: SpotifyAlbumEntry;
+}
+
+const { albumData } = Astro.props;
+
+// Group tracks by disc
+const tracksByDisc = new Map<number, typeof albumData.tracks>();
+for (const track of albumData.tracks) {
+  const disc = track.discNumber;
+  if (!tracksByDisc.has(disc)) tracksByDisc.set(disc, []);
+  tracksByDisc.get(disc)!.push(track);
+}
+
+const discNumbers = [...tracksByDisc.keys()].sort((a, b) => a - b);
+const isMultiDisc = discNumbers.length > 1;
+
+const totalDurationMs = albumData.tracks.reduce((sum, t) => sum + t.durationMs, 0);
+---
+
+<div class="mt-8">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-semibold text-gray-200 flex items-center gap-2">
+      <Disc3 class="h-5 w-5 text-accent" />
+      Tracklist
+    </h2>
+    <span class="text-xs text-gray-500">
+      {albumData.totalTracks} track{albumData.totalTracks !== 1 ? 's' : ''} &middot; {formatDuration(totalDurationMs)}
+    </span>
+  </div>
+
+  <div class="space-y-4">
+    {discNumbers.map((discNum) => (
+      <div>
+        {isMultiDisc && (
+          <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 px-3">
+            Disc {discNum}
+          </h3>
+        )}
+
+        <div class="divide-y divide-surface-200/30">
+          {tracksByDisc.get(discNum)!.map((track) => (
+            <a
+              href={track.spotifyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-3 px-3 py-2 rounded hover:bg-surface-100/50 transition-colors group"
+            >
+              <span class="text-xs text-gray-600 w-6 text-right shrink-0 tabular-nums">
+                {track.trackNumber}
+              </span>
+              <span class="flex-1 min-w-0 text-sm text-gray-300 truncate group-hover:text-accent-light transition-colors">
+                {track.name}
+              </span>
+              <span class="text-xs text-gray-600 shrink-0 tabular-nums">
+                {formatDuration(track.durationMs)}
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>

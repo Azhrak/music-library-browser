@@ -5,6 +5,7 @@ export const SPOTIFY_CONFIG = {
 
   // Manifest output (relative to project root)
   MANIFEST_PATH: "data/generated/spotifyArtistManifest.json",
+  ALBUM_MANIFEST_PATH: "data/generated/spotifyAlbumManifest.json",
 
   // Concurrency and rate limiting
   CONCURRENCY: 5,
