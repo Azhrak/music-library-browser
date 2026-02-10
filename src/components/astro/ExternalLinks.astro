@@ -22,7 +22,7 @@ const query = albumName
   : buildArtistSearchQuery(artistName);
 
 const youtubeUrl = getYouTubeSearchUrl(query);
-const spotifyUrl = spotifyDirectUrl ?? getSpotifySearchUrl(query);
+const spotifyUrl = spotifyDirectUrl ?? getSpotifySearchUrl(query, albumName ? "albums" : "artists");
 
 const subjectLabel = albumName
   ? `${albumName} by ${artistName}`
