@@ -8,6 +8,7 @@
     "spotify": "tsx scripts/fetchSpotifyArtists.ts",
     "dev": "pnpm parse && astro dev",
     "build": "pnpm parse && astro build",
+    "cf-deploy": "pnpm build && npx wrangler pages deploy dist",
     "preview": "astro preview",
     "format": "biome format --write .",
     "check": "biome check --write .",
