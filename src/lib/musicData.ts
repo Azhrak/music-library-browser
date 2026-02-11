@@ -67,14 +67,14 @@ export function getArtistBySlug(slug: string): Artist | undefined {
 }
 
 /**
- * Count total artists and albums in a genre (including all subgenres).
+ * Count artists and albums in a node with artists[] and subgenres[] properties.
  */
-export function getGenreCounts(genre: Genre): {
+function countTree(node: { artists: Artist[]; subgenres: Subgenre[] }): {
   artists: number;
   albums: number;
 } {
-  let artists = genre.artists.length;
-  let albums = genre.artists.reduce((sum, a) => sum + a.albums.length, 0);
+  let artists = node.artists.length;
+  let albums = node.artists.reduce((sum, a) => sum + a.albums.length, 0);
 
   function countSubgenre(sg: Subgenre) {
     artists += sg.artists.length;
@@ -82,26 +82,20 @@ export function getGenreCounts(genre: Genre): {
     sg.subgenres.forEach(countSubgenre);
   }
 
-  genre.subgenres.forEach(countSubgenre);
+  node.subgenres.forEach(countSubgenre);
   return { artists, albums };
+}
+
+/**
+ * Count total artists and albums in a genre (including all subgenres).
+ */
+export function getGenreCounts(genre: Genre): { artists: number; albums: number } {
+  return countTree(genre);
 }
 
 /**
  * Count total artists and albums in a subgenre (including nested subgenres).
  */
-export function getSubgenreCounts(sg: Subgenre): {
-  artists: number;
-  albums: number;
-} {
-  let artists = sg.artists.length;
-  let albums = sg.artists.reduce((sum, a) => sum + a.albums.length, 0);
-
-  function countNested(nested: Subgenre) {
-    artists += nested.artists.length;
-    albums += nested.artists.reduce((sum, a) => sum + a.albums.length, 0);
-    nested.subgenres.forEach(countNested);
-  }
-
-  sg.subgenres.forEach(countNested);
-  return { artists, albums };
+export function getSubgenreCounts(sg: Subgenre): { artists: number; albums: number } {
+  return countTree(sg);
 }

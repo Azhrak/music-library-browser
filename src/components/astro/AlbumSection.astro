@@ -1,0 +1,40 @@
+---
+import type { Album } from '../../../scripts/types';
+import { Album as AlbumIcon, Disc3, Music, PenTool, Mic, Archive, GitBranch, Package } from '@lucide/astro';
+import AlbumCard from './AlbumCard.astro';
+import { typeLabels } from '../../lib/albumTypeStyles';
+
+interface Props {
+  albums: Album[];
+  type: string;
+  artistSlug: string;
+}
+
+const { albums, type, artistSlug } = Astro.props;
+
+if (albums.length === 0) return;
+
+const typeIcons: Record<string, any> = {
+  album: AlbumIcon,
+  ep: Disc3,
+  single: Music,
+  demo: PenTool,
+  live: Mic,
+  compilation: Archive,
+  split: GitBranch,
+  other: Package,
+};
+
+const Icon = typeIcons[type] ?? typeIcons.other;
+const label = typeLabels[type] ?? 'Other';
+---
+
+<section class="mb-8">
+  <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
+    <Icon class="h-5 w-5 text-accent" />
+    {label} ({albums.length})
+  </h2>
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {albums.map((album) => <AlbumCard album={album} artistSlug={artistSlug} />)}
+  </div>
+</section>

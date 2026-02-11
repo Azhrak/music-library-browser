@@ -1,19 +1,16 @@
+import { loadManifest } from "./manifestLoader";
 import type { SpotifyAlbumEntry, SpotifyAlbumManifest } from "./spotifyTypes";
 
-let manifest: SpotifyAlbumManifest = {
-  generatedAt: "",
-  totalArtistsQueried: 0,
-  totalAlbumsMatched: 0,
-  totalAlbumsUnmatched: 0,
-  entries: {},
-};
-
-try {
-  const raw = await import("../../data/generated/spotifyAlbumManifest.json");
-  manifest = raw.default as unknown as SpotifyAlbumManifest;
-} catch {
-  // No manifest yet — albums will not show tracklists
-}
+const manifest = await loadManifest<SpotifyAlbumManifest>(
+  () => import("../../data/generated/spotifyAlbumManifest.json"),
+  {
+    generatedAt: "",
+    totalArtistsQueried: 0,
+    totalAlbumsMatched: 0,
+    totalAlbumsUnmatched: 0,
+    entries: {},
+  },
+);
 
 export function getSpotifyAlbumData(
   artistSlug: string,

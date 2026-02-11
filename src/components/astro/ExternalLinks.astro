@@ -1,5 +1,5 @@
 ---
-import { Youtube } from '@lucide/astro';
+import YouTubeIcon from './YouTubeIcon.astro';
 import SpotifyIcon from './SpotifyIcon.astro';
 import {
   buildAlbumSearchQuery,
@@ -39,7 +39,7 @@ const spotifyAction = spotifyDirectUrl ? 'Open' : 'Search for';
     aria-label={`Search for ${subjectLabel} on YouTube`}
     class="inline-flex items-center gap-1.5 rounded-md border border-surface-200 px-2.5 py-1 text-xs text-gray-400 transition-colors hover:border-red-500/50 hover:text-red-400"
   >
-    <Youtube class="h-3.5 w-3.5" />
+    <YouTubeIcon class="h-3.5 w-3.5" />
     YouTube
   </a>
   <a

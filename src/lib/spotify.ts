@@ -1,19 +1,10 @@
+import { loadManifest } from "./manifestLoader";
 import type { SpotifyArtistManifest } from "./spotifyTypes";
 
-let manifest: SpotifyArtistManifest = {
-  generatedAt: "",
-  totalQueried: 0,
-  matched: 0,
-  unmatched: 0,
-  entries: {},
-};
-
-try {
-  const raw = await import("../../data/generated/spotifyArtistManifest.json");
-  manifest = raw.default as unknown as SpotifyArtistManifest;
-} catch {
-  // No manifest yet — all artists will use search URL fallback
-}
+const manifest = await loadManifest<SpotifyArtistManifest>(
+  () => import("../../data/generated/spotifyArtistManifest.json"),
+  { generatedAt: "", totalQueried: 0, matched: 0, unmatched: 0, entries: {} },
+);
 
 export function getSpotifyArtistUrl(artistSlug: string): string | null {
   return manifest.entries?.[artistSlug]?.spotifyUrl ?? null;

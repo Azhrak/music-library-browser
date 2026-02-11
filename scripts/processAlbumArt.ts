@@ -3,7 +3,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { ART_CONFIG } from "./albumArtConfig.js";
-import type { Artist, Compilation, MusicLibrary, Subgenre } from "./types.js";
+import { loadEnvVar } from "./spotify/spotifyAuth.js";
+import { forEachArtistAndCompilation } from "./traversal.js";
+import type { MusicLibrary } from "./types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
@@ -34,15 +36,8 @@ interface AlbumJob {
 // ─── Helpers ────────────────────────────────────────────────────────────
 
 function getMusicLibraryRoot(): string {
-  const envRoot = process.env.MUSIC_LIBRARY_ROOT;
-  if (envRoot) return envRoot;
-
-  const envPath = path.join(ROOT, ".env");
-  if (fs.existsSync(envPath)) {
-    const content = fs.readFileSync(envPath, "utf-8");
-    const match = content.match(/^MUSIC_LIBRARY_ROOT=(.+)$/m);
-    if (match) return match[1].trim().replace(/^["']|["']$/g, "");
-  }
+  const root = loadEnvVar("MUSIC_LIBRARY_ROOT");
+  if (root) return root;
 
   console.error("MUSIC_LIBRARY_ROOT not set. Set it in .env or as environment variable.");
   process.exit(1);
@@ -109,14 +104,20 @@ async function processImage(
     return false;
   }
 
-  if (metadata.width > ART_CONFIG.MAX_SOURCE_DIMENSION || metadata.height > ART_CONFIG.MAX_SOURCE_DIMENSION) {
+  if (
+    metadata.width > ART_CONFIG.MAX_SOURCE_DIMENSION ||
+    metadata.height > ART_CONFIG.MAX_SOURCE_DIMENSION
+  ) {
     console.warn(`  SKIP (too large ${metadata.width}x${metadata.height}): ${sourcePath}`);
     return false;
   }
 
   // Generate single image (500x500, fit inside, preserve aspect ratio)
   await sharp(sourcePath)
-    .resize(ART_CONFIG.IMAGE_SIZE, ART_CONFIG.IMAGE_SIZE, { fit: "inside", withoutEnlargement: true })
+    .resize(ART_CONFIG.IMAGE_SIZE, ART_CONFIG.IMAGE_SIZE, {
+      fit: "inside",
+      withoutEnlargement: true,
+    })
     .webp({ quality: ART_CONFIG.WEBP_QUALITY })
     .toFile(outPath);
 
@@ -128,39 +129,29 @@ async function processImage(
 function collectJobs(musicData: MusicLibrary, musicRoot: string): AlbumJob[] {
   const jobs: AlbumJob[] = [];
 
-  function fromArtist(artist: Artist) {
-    const artistPath = path.join(musicRoot, ...artist.genrePath, artist.rawFolderName);
-    for (const album of artist.albums) {
-      jobs.push({
-        artistSlug: artist.slug,
-        albumSlug: album.slug,
-        fsPath: path.join(artistPath, album.rawFolderName),
-      });
-    }
-  }
-
-  function fromCompilation(comp: Compilation) {
-    const compPath = path.join(musicRoot, ...comp.genrePath, comp.rawFolderName);
-    for (const album of comp.albums) {
-      jobs.push({
-        artistSlug: comp.slug,
-        albumSlug: album.slug,
-        fsPath: path.join(compPath, album.rawFolderName),
-      });
-    }
-  }
-
-  function fromSubgenre(sg: Subgenre) {
-    sg.artists.forEach(fromArtist);
-    sg.compilations.forEach(fromCompilation);
-    sg.subgenres.forEach(fromSubgenre);
-  }
-
-  for (const genre of musicData.genres) {
-    genre.artists.forEach(fromArtist);
-    genre.compilations.forEach(fromCompilation);
-    genre.subgenres.forEach(fromSubgenre);
-  }
+  forEachArtistAndCompilation(
+    musicData,
+    (artist) => {
+      const artistPath = path.join(musicRoot, ...artist.genrePath, artist.rawFolderName);
+      for (const album of artist.albums) {
+        jobs.push({
+          artistSlug: artist.slug,
+          albumSlug: album.slug,
+          fsPath: path.join(artistPath, album.rawFolderName),
+        });
+      }
+    },
+    (comp) => {
+      const compPath = path.join(musicRoot, ...comp.genrePath, comp.rawFolderName);
+      for (const album of comp.albums) {
+        jobs.push({
+          artistSlug: comp.slug,
+          albumSlug: album.slug,
+          fsPath: path.join(compPath, album.rawFolderName),
+        });
+      }
+    },
+  );
 
   return jobs;
 }

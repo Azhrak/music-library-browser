@@ -10,6 +10,7 @@ import { getAllArtists } from '../../../lib/musicData';
 import { getAlbumArtUrl } from '../../../lib/albumArt';
 import { getSpotifyAlbumData } from '../../../lib/spotifyAlbums';
 import { slugify } from '../../../lib/slugify';
+import { getTypeColor } from '../../../lib/albumTypeStyles';
 
 export function getStaticPaths() {
   const artists = getAllArtists();
@@ -47,18 +48,7 @@ const breadcrumb = [
   { label: album.name },
 ];
 
-const typeColors: Record<string, string> = {
-  album: 'bg-accent/20 text-accent-light',
-  ep: 'bg-emerald-500/20 text-emerald-400',
-  single: 'bg-amber-500/20 text-amber-400',
-  demo: 'bg-orange-500/20 text-orange-400',
-  live: 'bg-rose-500/20 text-rose-400',
-  compilation: 'bg-cyan-500/20 text-cyan-400',
-  split: 'bg-violet-500/20 text-violet-400',
-  other: 'bg-gray-500/20 text-gray-400',
-};
-
-const badgeClass = typeColors[album.type] ?? typeColors.other;
+const badgeClass = getTypeColor(album.type);
 
 const typeIcons: Record<string, any> = {
   album: AlbumIcon,

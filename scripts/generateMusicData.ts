@@ -570,7 +570,14 @@ function main() {
   if (!fs.existsSync(manifestPath)) {
     fs.writeFileSync(
       manifestPath,
-      JSON.stringify({ generatedAt: "", musicLibraryRoot: "", totalAlbums: 0, albumsWithArt: 0, albumsWithoutArt: 0, entries: {} }),
+      JSON.stringify({
+        generatedAt: "",
+        musicLibraryRoot: "",
+        totalAlbums: 0,
+        albumsWithArt: 0,
+        albumsWithoutArt: 0,
+        entries: {},
+      }),
     );
     console.log("Created empty albumArtManifest.json (run 'pnpm art' to populate)");
   }

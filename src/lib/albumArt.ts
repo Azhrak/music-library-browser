@@ -1,17 +1,12 @@
 import type { ArtManifest } from "./albumArtTypes";
+import { loadManifest } from "./manifestLoader";
 
-let manifest: ArtManifest = { entries: {} };
-try {
-  const raw = await import("../../data/generated/albumArtManifest.json");
-  manifest = raw.default as unknown as ArtManifest;
-} catch {
-  // No manifest yet — all albums will show placeholder
-}
+const manifest = await loadManifest<ArtManifest>(
+  () => import("../../data/generated/albumArtManifest.json"),
+  { entries: {} },
+);
 
-export function getAlbumArtUrl(
-  artistSlug: string,
-  albumSlug: string,
-): string | null {
+export function getAlbumArtUrl(artistSlug: string, albumSlug: string): string | null {
   const artistEntries = manifest.entries?.[artistSlug];
   if (!artistEntries) return null;
 

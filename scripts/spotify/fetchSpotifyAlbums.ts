@@ -2,12 +2,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
-import { ART_CONFIG } from "./albumArtConfig.js";
+import { ART_CONFIG } from "../albumArtConfig.js";
+import { collectArtists } from "../traversal.js";
+import type { Album, MusicLibrary } from "../types.js";
+import { authenticate, sleep, spotifyGet } from "./spotifyAuth.js";
 import { SPOTIFY_CONFIG } from "./spotifyConfig.js";
-import type { Album, Artist, MusicLibrary, Subgenre } from "./types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.join(__dirname, "..");
+const ROOT = path.join(__dirname, "../..");
 
 // ─── Types ──────────────────────────────────────────────────────────────
 
@@ -105,104 +107,6 @@ interface ArtManifest {
   entries: Record<string, Record<string, AlbumArtEntry>>;
 }
 
-// ─── Environment ────────────────────────────────────────────────────────
-
-function loadEnvVar(name: string): string | undefined {
-  if (process.env[name]) return process.env[name];
-
-  const envPath = path.join(ROOT, ".env");
-  if (fs.existsSync(envPath)) {
-    const content = fs.readFileSync(envPath, "utf-8");
-    const match = content.match(new RegExp(`^${name}=(.+)$`, "m"));
-    if (match) return match[1].trim().replace(/^["']|["']$/g, "");
-  }
-
-  return undefined;
-}
-
-// ─── Spotify Auth ───────────────────────────────────────────────────────
-
-let accessToken = "";
-let tokenExpiresAt = 0;
-
-async function authenticate(): Promise<void> {
-  const clientId = loadEnvVar("SPOTIFY_CLIENT_ID");
-  const clientSecret = loadEnvVar("SPOTIFY_CLIENT_SECRET");
-
-  if (!clientId || !clientSecret) {
-    console.error(
-      "SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET must be set in .env or as environment variables.",
-    );
-    console.error("Get credentials at https://developer.spotify.com/dashboard");
-    process.exit(1);
-  }
-
-  const response = await fetch(SPOTIFY_CONFIG.TOKEN_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
-    },
-    body: "grant_type=client_credentials",
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    console.error(`Spotify auth failed (${response.status}): ${text}`);
-    process.exit(1);
-  }
-
-  const data = (await response.json()) as {
-    access_token: string;
-    expires_in: number;
-  };
-  accessToken = data.access_token;
-  tokenExpiresAt = Date.now() + (data.expires_in - 60) * 1000;
-  console.log("Spotify authentication successful.\n");
-}
-
-async function ensureAuth(): Promise<void> {
-  if (Date.now() >= tokenExpiresAt) {
-    console.log("Refreshing Spotify token...");
-    await authenticate();
-  }
-}
-
-// ─── Spotify API Helpers ────────────────────────────────────────────────
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function spotifyGet<T>(url: string): Promise<T | null> {
-  await ensureAuth();
-
-  for (let attempt = 0; attempt < SPOTIFY_CONFIG.MAX_RETRIES; attempt++) {
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    if (response.status === 429) {
-      const retryAfter = Number.parseInt(
-        response.headers.get("retry-after") ?? "5",
-        10,
-      );
-      console.warn(`  Rate limited. Waiting ${retryAfter}s...`);
-      await sleep(retryAfter * 1000);
-      continue;
-    }
-
-    if (!response.ok) {
-      console.warn(`  Spotify request failed (${response.status}): ${url}`);
-      return null;
-    }
-
-    return (await response.json()) as T;
-  }
-
-  return null;
-}
-
 // ─── Album Matching ─────────────────────────────────────────────────────
 
 function normalize(s: string): string {
@@ -241,8 +145,7 @@ function matchSpotifyAlbum(
 
     // Name matching
     const exactName = spotNorm === localNorm;
-    const containsMatch =
-      spotNorm.includes(localNorm) || localNorm.includes(spotNorm);
+    const containsMatch = spotNorm.includes(localNorm) || localNorm.includes(spotNorm);
 
     if (!exactName && !containsMatch) continue;
 
@@ -264,24 +167,15 @@ function matchSpotifyAlbum(
     // Prefer standard editions (penalize deluxe/remaster unless local has those too)
     const localRaw = localAlbum.rawFolderName.toLowerCase();
     const spotLower = spot.name.toLowerCase();
-    if (
-      spotLower.match(/deluxe|expanded|super/) &&
-      !localRaw.match(/deluxe|expanded|super/)
-    ) {
+    if (spotLower.match(/deluxe|expanded|super/) && !localRaw.match(/deluxe|expanded|super/)) {
       score -= 15;
     }
 
     // Prefer matching album types
-    if (
-      localAlbum.type === "compilation" &&
-      spot.album_type !== "compilation"
-    ) {
+    if (localAlbum.type === "compilation" && spot.album_type !== "compilation") {
       score -= 30;
     }
-    if (
-      localAlbum.type !== "compilation" &&
-      spot.album_type === "compilation"
-    ) {
+    if (localAlbum.type !== "compilation" && spot.album_type === "compilation") {
       score -= 30;
     }
 
@@ -299,13 +193,10 @@ function matchSpotifyAlbum(
 
 // ─── Fetch Artist Albums from Spotify ───────────────────────────────────
 
-async function fetchArtistAlbums(
-  spotifyId: string,
-): Promise<SpotifyAlbumSimple[]> {
+async function fetchArtistAlbums(spotifyId: string): Promise<SpotifyAlbumSimple[]> {
   const allAlbums: SpotifyAlbumSimple[] = [];
-  let url:
-    | string
-    | null = `${SPOTIFY_CONFIG.API_BASE}/artists/${spotifyId}/albums?include_groups=album,single,compilation&limit=50`;
+  let url: string | null =
+    `${SPOTIFY_CONFIG.API_BASE}/artists/${spotifyId}/albums?include_groups=album,single,compilation&limit=50`;
 
   interface ArtistAlbumsResponse {
     items: SpotifyAlbumSimple[];
@@ -313,8 +204,7 @@ async function fetchArtistAlbums(
   }
 
   while (url) {
-    const data: ArtistAlbumsResponse | null =
-      await spotifyGet<ArtistAlbumsResponse>(url);
+    const data: ArtistAlbumsResponse | null = await spotifyGet<ArtistAlbumsResponse>(url);
 
     if (!data) break;
     allAlbums.push(...data.items);
@@ -326,9 +216,7 @@ async function fetchArtistAlbums(
 
 // ─── Fetch Full Album Details (batch) ───────────────────────────────────
 
-async function fetchAlbumsBatch(
-  albumIds: string[],
-): Promise<SpotifyAlbumFull[]> {
+async function fetchAlbumsBatch(albumIds: string[]): Promise<SpotifyAlbumFull[]> {
   if (albumIds.length === 0) return [];
 
   // Spotify allows up to 20 albums per request
@@ -352,12 +240,7 @@ async function fetchAlbumsBatch(
 // ─── Album Art Download ─────────────────────────────────────────────────
 
 function albumArtExists(artistSlug: string, albumSlug: string): boolean {
-  const artPath = path.join(
-    ROOT,
-    ART_CONFIG.OUTPUT_DIR,
-    artistSlug,
-    `${albumSlug}.webp`,
-  );
+  const artPath = path.join(ROOT, ART_CONFIG.OUTPUT_DIR, artistSlug, `${albumSlug}.webp`);
   return fs.existsSync(artPath);
 }
 
@@ -386,48 +269,9 @@ async function downloadAlbumArt(
 
     return true;
   } catch (err) {
-    console.warn(
-      `  Failed to download art for ${artistSlug}/${albumSlug}: ${err}`,
-    );
+    console.warn(`  Failed to download art for ${artistSlug}/${albumSlug}: ${err}`);
     return false;
   }
-}
-
-// ─── Job Collection ─────────────────────────────────────────────────────
-
-function collectArtistJobs(
-  musicData: MusicLibrary,
-  artistManifest: SpotifyArtistManifest,
-): ArtistJob[] {
-  const seen = new Set<string>();
-  const jobs: ArtistJob[] = [];
-
-  function addArtist(artist: Artist) {
-    if (seen.has(artist.slug)) return;
-    seen.add(artist.slug);
-
-    const spotifyEntry = artistManifest.entries[artist.slug];
-    if (!spotifyEntry) return; // No Spotify ID — skip
-
-    jobs.push({
-      slug: artist.slug,
-      name: artist.name,
-      spotifyId: spotifyEntry.spotifyId,
-      albums: artist.albums,
-    });
-  }
-
-  function fromSubgenre(sg: Subgenre) {
-    sg.artists.forEach(addArtist);
-    sg.subgenres.forEach(fromSubgenre);
-  }
-
-  for (const genre of musicData.genres) {
-    genre.artists.forEach(addArtist);
-    genre.subgenres.forEach(fromSubgenre);
-  }
-
-  return jobs;
 }
 
 // ─── Main ───────────────────────────────────────────────────────────────
@@ -444,16 +288,12 @@ async function main() {
     console.error("musicData.json not found. Run 'pnpm parse' first.");
     process.exit(1);
   }
-  const musicData: MusicLibrary = JSON.parse(
-    fs.readFileSync(musicDataPath, "utf-8"),
-  );
+  const musicData: MusicLibrary = JSON.parse(fs.readFileSync(musicDataPath, "utf-8"));
 
   // Load artist manifest
   const artistManifestPath = path.join(ROOT, SPOTIFY_CONFIG.MANIFEST_PATH);
   if (!fs.existsSync(artistManifestPath)) {
-    console.error(
-      "spotifyArtistManifest.json not found. Run 'pnpm spotify' first.",
-    );
+    console.error("spotifyArtistManifest.json not found. Run 'pnpm spotify' first.");
     process.exit(1);
   }
   const artistManifest: SpotifyArtistManifest = JSON.parse(
@@ -461,10 +301,7 @@ async function main() {
   );
 
   // Load existing album manifest (for incremental updates)
-  const albumManifestPath = path.join(
-    ROOT,
-    SPOTIFY_CONFIG.ALBUM_MANIFEST_PATH,
-  );
+  const albumManifestPath = path.join(ROOT, SPOTIFY_CONFIG.ALBUM_MANIFEST_PATH);
   let manifest: SpotifyAlbumManifest = {
     generatedAt: "",
     totalArtistsQueried: 0,
@@ -477,9 +314,7 @@ async function main() {
     try {
       manifest = JSON.parse(fs.readFileSync(albumManifestPath, "utf-8"));
       const existingArtists = Object.keys(manifest.entries).length;
-      console.log(
-        `Loaded existing album manifest with ${existingArtists} artist entries.`,
-      );
+      console.log(`Loaded existing album manifest with ${existingArtists} artist entries.`);
     } catch {
       console.warn("Could not parse existing album manifest, starting fresh.");
     }
@@ -504,14 +339,21 @@ async function main() {
     }
   }
 
-  // Collect jobs
-  let allJobs = collectArtistJobs(musicData, artistManifest);
+  // Collect jobs using shared traversal
+  let allJobs: ArtistJob[] = collectArtists(musicData, (artist) => {
+    const spotifyEntry = artistManifest.entries[artist.slug];
+    if (!spotifyEntry) return null; // No Spotify ID — skip
+    return {
+      slug: artist.slug,
+      name: artist.name,
+      spotifyId: spotifyEntry.spotifyId,
+      albums: artist.albums,
+    };
+  });
   const totalArtists = allJobs.length;
 
   // Filter out already-processed artists
-  const newJobs = allJobs.filter(
-    (job) => !(job.slug in manifest.entries),
-  );
+  const newJobs = allJobs.filter((job) => !(job.slug in manifest.entries));
 
   if (limit > 0) {
     allJobs = newJobs.slice(0, limit);
@@ -587,8 +429,7 @@ async function main() {
             if (!matchInfo) continue;
 
             const { localAlbum } = matchInfo;
-            const imageUrl =
-              fullAlbum.images.length > 0 ? fullAlbum.images[0].url : null;
+            const imageUrl = fullAlbum.images.length > 0 ? fullAlbum.images[0].url : null;
 
             manifest.entries[job.slug][localAlbum.slug] = {
               albumSlug: localAlbum.slug,
@@ -610,15 +451,8 @@ async function main() {
             };
 
             // Download album art if missing locally
-            if (
-              imageUrl &&
-              !albumArtExists(job.slug, localAlbum.slug)
-            ) {
-              const ok = await downloadAlbumArt(
-                imageUrl,
-                job.slug,
-                localAlbum.slug,
-              );
+            if (imageUrl && !albumArtExists(job.slug, localAlbum.slug)) {
+              const ok = await downloadAlbumArt(imageUrl, job.slug, localAlbum.slug);
               if (ok) {
                 artDownloaded++;
                 // Update art manifest
@@ -696,10 +530,7 @@ function writeManifest(
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 }
 
-function writeArtManifest(
-  manifest: ArtManifest,
-  manifestPath: string,
-): void {
+function writeArtManifest(manifest: ArtManifest, manifestPath: string): void {
   let total = 0;
   for (const artistEntries of Object.values(manifest.entries)) {
     total += Object.keys(artistEntries).length;

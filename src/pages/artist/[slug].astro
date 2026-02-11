@@ -1,13 +1,13 @@
 ---
 import Layout from '../../components/astro/Layout.astro';
 import Breadcrumb from '../../components/astro/Breadcrumb.astro';
-import AlbumCard from '../../components/astro/AlbumCard.astro';
+import AlbumSection from '../../components/astro/AlbumSection.astro';
 import CountryFlag from '../../components/astro/CountryFlag.astro';
 import ExternalLinks from '../../components/astro/ExternalLinks.astro';
-import { Album, Disc3, Music, PenTool, Mic, Archive, GitBranch, Package } from '@lucide/astro';
 import { getAllArtists } from '../../lib/musicData';
 import { getSpotifyArtistUrl } from '../../lib/spotify';
 import { slugify } from '../../lib/slugify';
+import { albumTypeSections } from '../../lib/albumTypeStyles';
 
 export function getStaticPaths() {
   const artists = getAllArtists();
@@ -32,18 +32,7 @@ const breadcrumb = [
   { label: artist.name },
 ];
 
-// Group albums by type
 const albums = artist.albums;
-const albumsByType = {
-  main: albums.filter((a) => a.type === 'album'),
-  eps: albums.filter((a) => a.type === 'ep'),
-  singles: albums.filter((a) => a.type === 'single'),
-  demos: albums.filter((a) => a.type === 'demo'),
-  live: albums.filter((a) => a.type === 'live'),
-  compilations: albums.filter((a) => a.type === 'compilation'),
-  splits: albums.filter((a) => a.type === 'split'),
-  other: albums.filter((a) => a.type === 'other'),
-};
 ---
 
 <Layout title={artist.name}>
@@ -78,99 +67,8 @@ const albumsByType = {
     </p>
   </div>
 
-  {albumsByType.main.length > 0 && (
-    <section class="mb-8">
-      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
-        <Album class="h-5 w-5 text-accent" />
-        Albums ({albumsByType.main.length})
-      </h2>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.main.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
-      </div>
-    </section>
-  )}
-
-  {albumsByType.eps.length > 0 && (
-    <section class="mb-8">
-      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
-        <Disc3 class="h-5 w-5 text-accent" />
-        EPs ({albumsByType.eps.length})
-      </h2>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.eps.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
-      </div>
-    </section>
-  )}
-
-  {albumsByType.singles.length > 0 && (
-    <section class="mb-8">
-      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
-        <Music class="h-5 w-5 text-accent" />
-        Singles ({albumsByType.singles.length})
-      </h2>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.singles.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
-      </div>
-    </section>
-  )}
-
-  {albumsByType.demos.length > 0 && (
-    <section class="mb-8">
-      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
-        <PenTool class="h-5 w-5 text-accent" />
-        Demos ({albumsByType.demos.length})
-      </h2>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.demos.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
-      </div>
-    </section>
-  )}
-
-  {albumsByType.live.length > 0 && (
-    <section class="mb-8">
-      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
-        <Mic class="h-5 w-5 text-accent" />
-        Live ({albumsByType.live.length})
-      </h2>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.live.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
-      </div>
-    </section>
-  )}
-
-  {albumsByType.compilations.length > 0 && (
-    <section class="mb-8">
-      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
-        <Archive class="h-5 w-5 text-accent" />
-        Compilations ({albumsByType.compilations.length})
-      </h2>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.compilations.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
-      </div>
-    </section>
-  )}
-
-  {albumsByType.splits.length > 0 && (
-    <section class="mb-8">
-      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
-        <GitBranch class="h-5 w-5 text-accent" />
-        Splits ({albumsByType.splits.length})
-      </h2>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.splits.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
-      </div>
-    </section>
-  )}
-
-  {albumsByType.other.length > 0 && (
-    <section class="mb-8">
-      <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
-        <Package class="h-5 w-5 text-accent" />
-        Other ({albumsByType.other.length})
-      </h2>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {albumsByType.other.map((album) => <AlbumCard album={album} artistSlug={artist.slug} />)}
-      </div>
-    </section>
-  )}
+  {albumTypeSections.map((type) => {
+    const filtered = albums.filter((a) => a.type === type);
+    return <AlbumSection albums={filtered} type={type} artistSlug={artist.slug} />;
+  })}
 </Layout>

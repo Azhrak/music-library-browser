@@ -258,9 +258,7 @@ export function resolveIsoCode(customCode: string): string | null {
 export function resolveIsoCodes(customCode: string | null): string[] {
   if (!customCode) return [];
   const parts = customCode.split(/[-&]/);
-  return parts
-    .map((p) => resolveIsoCode(p.trim()))
-    .filter((code): code is string => code !== null);
+  return parts.map((p) => resolveIsoCode(p.trim())).filter((code): code is string => code !== null);
 }
 
 export function resolveCountry(code: string | null): string | null {

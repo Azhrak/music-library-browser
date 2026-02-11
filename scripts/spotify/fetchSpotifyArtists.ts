@@ -1,11 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { collectArtists } from "../traversal.js";
+import type { MusicLibrary } from "../types.js";
+import { authenticate, ensureAuth, getAccessToken, sleep } from "./spotifyAuth.js";
 import { SPOTIFY_CONFIG } from "./spotifyConfig.js";
-import type { Artist, MusicLibrary, Subgenre } from "./types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.join(__dirname, "..");
+const ROOT = path.join(__dirname, "../..");
 
 // ─── Types ──────────────────────────────────────────────────────────────
 
@@ -29,67 +31,6 @@ interface ArtistJob {
   name: string;
 }
 
-// ─── Environment ────────────────────────────────────────────────────────
-
-function loadEnvVar(name: string): string | undefined {
-  if (process.env[name]) return process.env[name];
-
-  const envPath = path.join(ROOT, ".env");
-  if (fs.existsSync(envPath)) {
-    const content = fs.readFileSync(envPath, "utf-8");
-    const match = content.match(new RegExp(`^${name}=(.+)$`, "m"));
-    if (match) return match[1].trim().replace(/^["']|["']$/g, "");
-  }
-
-  return undefined;
-}
-
-// ─── Spotify Auth ───────────────────────────────────────────────────────
-
-let accessToken = "";
-let tokenExpiresAt = 0;
-
-async function authenticate(): Promise<void> {
-  const clientId = loadEnvVar("SPOTIFY_CLIENT_ID");
-  const clientSecret = loadEnvVar("SPOTIFY_CLIENT_SECRET");
-
-  if (!clientId || !clientSecret) {
-    console.error(
-      "SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET must be set in .env or as environment variables.",
-    );
-    console.error("Get credentials at https://developer.spotify.com/dashboard");
-    process.exit(1);
-  }
-
-  const response = await fetch(SPOTIFY_CONFIG.TOKEN_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
-    },
-    body: "grant_type=client_credentials",
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    console.error(`Spotify auth failed (${response.status}): ${text}`);
-    process.exit(1);
-  }
-
-  const data = (await response.json()) as { access_token: string; expires_in: number };
-  accessToken = data.access_token;
-  // Refresh 60s before expiry
-  tokenExpiresAt = Date.now() + (data.expires_in - 60) * 1000;
-  console.log("Spotify authentication successful.\n");
-}
-
-async function ensureAuth(): Promise<void> {
-  if (Date.now() >= tokenExpiresAt) {
-    console.log("Refreshing Spotify token...");
-    await authenticate();
-  }
-}
-
 // ─── Spotify API ────────────────────────────────────────────────────────
 
 function normalize(s: string): string {
@@ -109,7 +50,7 @@ async function searchArtist(
 
   for (let attempt = 0; attempt < SPOTIFY_CONFIG.MAX_RETRIES; attempt++) {
     const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${getAccessToken()}` },
     });
 
     if (response.status === 429) {
@@ -148,10 +89,7 @@ async function searchArtist(
     // If no exact match, take the first result only if it's close enough
     const first = items[0];
     const firstNorm = normalize(first.name);
-    if (
-      firstNorm.includes(normalizedQuery) ||
-      normalizedQuery.includes(firstNorm)
-    ) {
+    if (firstNorm.includes(normalizedQuery) || normalizedQuery.includes(firstNorm)) {
       return { spotifyId: first.id, spotifyUrl: first.external_urls.spotify };
     }
 
@@ -159,35 +97,6 @@ async function searchArtist(
   }
 
   return null;
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-// ─── Job Collection ─────────────────────────────────────────────────────
-
-function collectArtists(musicData: MusicLibrary): ArtistJob[] {
-  const seen = new Set<string>();
-  const jobs: ArtistJob[] = [];
-
-  function addArtist(artist: Artist) {
-    if (seen.has(artist.slug)) return;
-    seen.add(artist.slug);
-    jobs.push({ slug: artist.slug, name: artist.name });
-  }
-
-  function fromSubgenre(sg: Subgenre) {
-    sg.artists.forEach(addArtist);
-    sg.subgenres.forEach(fromSubgenre);
-  }
-
-  for (const genre of musicData.genres) {
-    genre.artists.forEach(addArtist);
-    genre.subgenres.forEach(fromSubgenre);
-  }
-
-  return jobs;
 }
 
 // ─── Main ───────────────────────────────────────────────────────────────
@@ -199,9 +108,7 @@ async function main() {
     process.exit(1);
   }
 
-  const musicData: MusicLibrary = JSON.parse(
-    fs.readFileSync(musicDataPath, "utf-8"),
-  );
+  const musicData: MusicLibrary = JSON.parse(fs.readFileSync(musicDataPath, "utf-8"));
 
   // Load existing manifest to skip already-fetched artists
   const manifestPath = path.join(ROOT, SPOTIFY_CONFIG.MANIFEST_PATH);
@@ -224,10 +131,11 @@ async function main() {
     }
   }
 
-  const allArtists = collectArtists(musicData);
-  const newJobs = allArtists.filter(
-    (artist) => !(artist.slug in existingManifest.entries),
-  );
+  const allArtists: ArtistJob[] = collectArtists(musicData, (artist) => ({
+    slug: artist.slug,
+    name: artist.name,
+  }));
+  const newJobs = allArtists.filter((artist) => !(artist.slug in existingManifest.entries));
 
   console.log(`Total artists: ${allArtists.length}`);
   console.log(`Already fetched: ${allArtists.length - newJobs.length}`);
@@ -283,7 +191,7 @@ async function main() {
 
     // Save checkpoint every 500 artists
     if (processed % 500 === 0 && processed > 0) {
-      writeManifest(existingManifest, manifestPath, allArtists.length, matched, unmatched);
+      writeManifest(existingManifest, manifestPath, allArtists.length);
       console.log("  Checkpoint saved.");
     }
 
@@ -293,7 +201,7 @@ async function main() {
   }
 
   // Final manifest write
-  writeManifest(existingManifest, manifestPath, allArtists.length, matched, unmatched);
+  writeManifest(existingManifest, manifestPath, allArtists.length);
 
   console.log("\nDone!");
   console.log(`New artists queried: ${processed}`);
@@ -310,8 +218,6 @@ function writeManifest(
   manifest: SpotifyArtistManifest,
   manifestPath: string,
   totalArtists: number,
-  newMatched: number,
-  newUnmatched: number,
 ): void {
   const totalEntries = Object.keys(manifest.entries).length;
   manifest.generatedAt = new Date().toISOString();
