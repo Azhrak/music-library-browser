@@ -14,7 +14,9 @@
     "format": "biome format --write .",
     "check": "biome check --write .",
     "lint": "biome lint .",
-    "typecheck": "astro check"
+    "typecheck": "astro check",
+    "screenshots": "pnpm build && tsx scripts/captureScreenshots.ts",
+    "screenshots:only": "tsx scripts/captureScreenshots.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -39,6 +41,7 @@
     "@types/node": "^25.2.2",
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
+    "playwright": "^1.58.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

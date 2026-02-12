@@ -6,20 +6,20 @@ interface Props {
 const { items } = Astro.props;
 ---
 
-<nav class="mb-6 text-sm text-gray-400">
-  <ol class="flex flex-wrap items-center gap-1">
-    <li>
+<nav class="mb-6 text-sm text-gray-400 overflow-hidden">
+  <ol class="flex flex-wrap items-center gap-x-1 gap-y-0.5">
+    <li class="shrink-0">
       <a href="/" class="hover:text-accent-light transition-colors">Home</a>
     </li>
-    {items.map((item) => (
-      <li class="flex items-center gap-1">
+    {items.map((item, i) => (
+      <li class={`flex items-center gap-1 ${i === items.length - 1 ? 'min-w-0' : 'shrink-0'}`}>
         <span class="text-gray-600">/</span>
         {item.href ? (
-          <a href={item.href} class="hover:text-accent-light transition-colors">
+          <a href={item.href} class="hover:text-accent-light transition-colors truncate">
             {item.label}
           </a>
         ) : (
-          <span class="text-gray-200">{item.label}</span>
+          <span class="text-gray-200 truncate">{item.label}</span>
         )}
       </li>
     ))}

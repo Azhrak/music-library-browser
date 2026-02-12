@@ -44,7 +44,7 @@ const TypeIcon = typeIcons[album.type] ?? typeIcons.other;
     <div class="min-w-0 flex-1">
       <div class="flex items-start gap-2">
         <TypeIcon class="h-5 w-5 text-accent shrink-0 mt-0.5" />
-        <h3 class="font-medium text-gray-100 group-hover:text-accent-light transition-colors">{album.name}</h3>
+        <h3 class="font-medium text-gray-100 group-hover:text-accent-light transition-colors truncate">{album.name}</h3>
       </div>
       <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-400">
         {album.year && <span>{album.year}</span>}

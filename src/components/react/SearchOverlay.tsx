@@ -105,7 +105,7 @@ export default function SearchOverlay({ onClose }: Props) {
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm pt-[15vh]"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm pt-[8vh] sm:pt-[15vh]"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -113,7 +113,7 @@ export default function SearchOverlay({ onClose }: Props) {
         if (e.key === "Escape") onClose();
       }}
     >
-      <div className="w-full max-w-xl rounded-xl border border-[#333] bg-[#0f0f0f] shadow-2xl">
+      <div className="mx-3 w-full max-w-xl rounded-xl border border-[#333] bg-[#0f0f0f] shadow-2xl sm:mx-0">
         <div className="flex items-center border-b border-[#333] px-4">
           <svg
             xmlns="http://www.w3.org/2000/svg"

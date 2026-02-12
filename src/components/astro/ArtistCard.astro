@@ -27,7 +27,7 @@ const { artist } = Astro.props;
     {artist.country && (
       <span class="ml-2 inline-flex items-center gap-1.5 text-sm text-gray-500">
         <CountryFlag isoCodes={artist.isoCodes} country={artist.country} size={16} />
-        {artist.country}
+        <span class="hidden sm:inline">{artist.country}</span>
       </span>
     )}
   </div>

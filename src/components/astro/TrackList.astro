@@ -49,9 +49,9 @@ const totalDurationMs = albumData.tracks.reduce((sum, t) => sum + t.durationMs, 
               href={track.spotifyUrl}
               target="_blank"
               rel="noopener noreferrer"
-              class="flex items-center gap-3 px-3 py-2 rounded hover:bg-surface-100/50 transition-colors group"
+              class="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded hover:bg-surface-100/50 transition-colors group"
             >
-              <span class="text-xs text-gray-600 w-6 text-right shrink-0 tabular-nums">
+              <span class="text-xs text-gray-600 w-5 sm:w-6 text-right shrink-0 tabular-nums">
                 {track.trackNumber}
               </span>
               <span class="flex-1 min-w-0 text-sm text-gray-300 truncate group-hover:text-accent-light transition-colors">
