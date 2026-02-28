@@ -9,7 +9,8 @@
     "spotify-albums": "tsx scripts/spotify/fetchSpotifyAlbums.ts",
     "dev": "pnpm parse && astro dev",
     "build": "pnpm parse && astro build",
-    "cf-deploy": "pnpm build && npx wrangler pages deploy dist",
+    "upload-art": "tsx scripts/uploadAlbumArtToR2.ts",
+    "cf-deploy": "pnpm build && rm -rf dist/album-art && npx wrangler pages deploy dist",
     "preview": "astro preview",
     "format": "biome format --write .",
     "check": "biome check --write .",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
+    "@aws-sdk/client-s3": "^3.1000.0",
     "@biomejs/biome": "^2.3.14",
     "@types/node": "^25.2.2",
     "@types/react": "^19.2.13",

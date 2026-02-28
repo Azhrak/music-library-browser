@@ -13,5 +13,6 @@ export function getAlbumArtUrl(artistSlug: string, albumSlug: string): string | 
   const entry = artistEntries[albumSlug];
   if (!entry) return null;
 
-  return `/album-art/${artistSlug}/${albumSlug}.webp`;
+  const base = import.meta.env.ALBUM_ART_BASE_URL ?? "";
+  return `${base}/album-art/${artistSlug}/${albumSlug}.webp`;
 }
