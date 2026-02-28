@@ -8,28 +8,42 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
 const ART_DIR = path.join(ROOT, "public/album-art");
 
-const BUCKET = "music-library-browser";
 const CONCURRENCY = 10;
 
 // ─── R2 client ──────────────────────────────────────────────────────────
 
-function createR2Client(): S3Client {
+interface R2Config {
+  client: S3Client;
+  bucket: string;
+  publicUrl: string;
+}
+
+function getR2Config(): R2Config {
   const accessKeyId = loadEnvVar("R2_ACCESS_KEY_ID");
   const secretAccessKey = loadEnvVar("R2_SECRET_ACCESS_KEY");
   const endpoint = loadEnvVar("R2_ENDPOINT");
+  const bucket = loadEnvVar("R2_BUCKET");
+  const publicUrl = loadEnvVar("ALBUM_ART_BASE_URL");
 
-  if (!accessKeyId || !secretAccessKey || !endpoint) {
-    console.error(
-      "Missing R2 credentials. Set R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_ENDPOINT in .env",
-    );
+  const missing = [
+    !accessKeyId && "R2_ACCESS_KEY_ID",
+    !secretAccessKey && "R2_SECRET_ACCESS_KEY",
+    !endpoint && "R2_ENDPOINT",
+    !bucket && "R2_BUCKET",
+  ].filter(Boolean);
+
+  if (missing.length) {
+    console.error(`Missing R2 config. Set in .env: ${missing.join(", ")}`);
     process.exit(1);
   }
 
-  return new S3Client({
+  const client = new S3Client({
     region: "auto",
-    endpoint,
-    credentials: { accessKeyId, secretAccessKey },
+    endpoint: endpoint as string,
+    credentials: { accessKeyId: accessKeyId as string, secretAccessKey: secretAccessKey as string },
   });
+
+  return { client, bucket: bucket as string, publicUrl: publicUrl ?? "" };
 }
 
 // ─── File discovery ─────────────────────────────────────────────────────
@@ -67,11 +81,11 @@ function collectJobs(): UploadJob[] {
 
 // ─── Upload ─────────────────────────────────────────────────────────────
 
-async function uploadJob(client: S3Client, job: UploadJob): Promise<void> {
+async function uploadJob(config: R2Config, job: UploadJob): Promise<void> {
   const body = fs.readFileSync(job.localPath);
-  await client.send(
+  await config.client.send(
     new PutObjectCommand({
-      Bucket: BUCKET,
+      Bucket: config.bucket,
       Key: job.r2Key,
       Body: body,
       ContentType: "image/webp",
@@ -80,18 +94,17 @@ async function uploadJob(client: S3Client, job: UploadJob): Promise<void> {
   );
 }
 
-async function uploadAll(client: S3Client, jobs: UploadJob[]): Promise<void> {
+async function uploadAll(config: R2Config, jobs: UploadJob[]): Promise<void> {
   let done = 0;
   let failed = 0;
   const total = jobs.length;
 
-  // Process in batches of CONCURRENCY
   for (let i = 0; i < jobs.length; i += CONCURRENCY) {
     const batch = jobs.slice(i, i + CONCURRENCY);
     await Promise.all(
       batch.map(async (job) => {
         try {
-          await uploadJob(client, job);
+          await uploadJob(config, job);
           done++;
           if (done % 100 === 0 || done === total) {
             process.stdout.write(`\r  ${done}/${total} uploaded${failed ? ` (${failed} failed)` : ""}   `);
@@ -114,15 +127,16 @@ async function uploadAll(client: S3Client, jobs: UploadJob[]): Promise<void> {
 // ─── Main ───────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
+  const config = getR2Config();
   const jobs = collectJobs();
-  console.log(`Found ${jobs.length} album art files in ${ART_DIR}`);
-  console.log(`Uploading to r2://${BUCKET}/album-art/ ...`);
 
-  const client = createR2Client();
-  await uploadAll(client, jobs);
+  console.log(`Found ${jobs.length} album art files in ${ART_DIR}`);
+  console.log(`Uploading to r2://${config.bucket}/album-art/ ...`);
+
+  await uploadAll(config, jobs);
 
   console.log(`Done. Files accessible at:`);
-  console.log(`  https://images.mlb.azhrak.dev/album-art/`);
+  console.log(`  ${config.publicUrl}/album-art/`);
 }
 
 main().catch((err) => {

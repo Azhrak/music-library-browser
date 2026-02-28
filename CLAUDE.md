@@ -106,6 +106,7 @@ SPOTIFY_CLIENT_SECRET=
 R2_ACCESS_KEY_ID=                   # R2 API token (from R2 dashboard → Manage R2 API tokens)
 R2_SECRET_ACCESS_KEY=
 R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+R2_BUCKET=<bucket-name>
 
 # Album art base URL (unset for local dev, set for production builds)
 ALBUM_ART_BASE_URL=https://images.mlb.azhrak.dev
