@@ -6,7 +6,7 @@ import GenreList from '../../components/react/GenreList';
 import { Layers, Users, Disc3, Archive } from '@lucide/astro';
 import type { Subgenre } from '../../../scripts/types';
 import { getGenres, getSubgenreCounts } from '../../lib/musicData';
-import { getArtistPlaycount } from '../../lib/lastfm';
+import { getArtistPlaycount, getNodePlaycount } from '../../lib/lastfm';
 import { slugify } from '../../lib/slugify';
 
 interface PathEntry {
@@ -96,13 +96,6 @@ for (const a of artists) {
   if (pc !== null) playcounts[a.slug] = pc;
 }
 
-function getSubgenrePlaycount(sg: Subgenre): number {
-  let total = 0;
-  for (const a of sg.artists) total += getArtistPlaycount(a.slug) ?? 0;
-  for (const child of sg.subgenres) total += getSubgenrePlaycount(child);
-  return total;
-}
-
 const subgenreRows = subgenres.map((sg) => {
   const counts = getSubgenreCounts(sg);
   return {
@@ -110,7 +103,7 @@ const subgenreRows = subgenres.map((sg) => {
     href: `/genre/${sg.fullPath.map((p) => slugify(p)).join('/')}`,
     artistCount: counts.artists,
     albumCount: counts.albums,
-    plays: getSubgenrePlaycount(sg),
+    plays: getNodePlaycount(sg),
   };
 });
 const subgenreHasPlaycounts = subgenreRows.some((r) => r.plays > 0);

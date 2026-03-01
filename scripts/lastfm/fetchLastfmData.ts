@@ -10,29 +10,17 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import type {
+  LastfmAlbumEntry,
+  LastfmArtistEntry,
+  LastfmManifest,
+} from "../../src/lib/lastfmTypes.js";
+import { loadEnvVar, sleep } from "../spotify/spotifyAuth.js";
+import type { Artist, MusicLibrary } from "../types.js";
 import { LASTFM_CONFIG } from "./lastfmConfig.js";
-import type { MusicLibrary, Artist } from "../types.js";
-import type { LastfmManifest, LastfmArtistEntry, LastfmAlbumEntry } from "../../src/lib/lastfmTypes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "../..");
-
-// ─── Environment ─────────────────────────────────────────────────────────────
-
-function loadEnvVar(name: string): string | undefined {
-  if (process.env[name]) return process.env[name];
-  const envPath = path.join(ROOT, ".env");
-  if (fs.existsSync(envPath)) {
-    const content = fs.readFileSync(envPath, "utf-8");
-    const match = content.match(new RegExp(`^${name}=(.+)$`, "m"));
-    if (match) return match[1].trim().replace(/^["']|["']$/g, "");
-  }
-  return undefined;
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 // ─── Normalization ────────────────────────────────────────────────────────────
 
@@ -68,70 +56,61 @@ interface LastfmPageAttr {
   total: string;
 }
 
-async function fetchTopArtists(apiKey: string): Promise<LastfmArtistRaw[]> {
-  const results: LastfmArtistRaw[] = [];
+async function fetchTopItems<T>(
+  apiKey: string,
+  method: string,
+  responseKey: string,
+  itemKey: string,
+  label: string,
+): Promise<T[]> {
+  const results: T[] = [];
   let page = 1;
   let totalPages = 1;
 
-  console.log("Fetching top artists from Last.fm...");
+  console.log(`Fetching top ${label} from Last.fm...`);
 
   do {
-    const url = `${LASTFM_CONFIG.API_BASE}/?method=user.getTopArtists&user=${LASTFM_CONFIG.USER}&api_key=${apiKey}&format=json&limit=${LASTFM_CONFIG.LIMIT}&page=${page}&period=overall`;
+    const url = `${LASTFM_CONFIG.API_BASE}/?method=${method}&user=${LASTFM_CONFIG.USER}&api_key=${apiKey}&format=json&limit=${LASTFM_CONFIG.LIMIT}&page=${page}&period=overall`;
     const res = await fetch(url, { headers: { "User-Agent": "MusicLibraryBrowser/1.0" } });
 
     if (!res.ok) {
-      console.error(`  Last.fm artist fetch failed (${res.status}) on page ${page}`);
+      console.error(`  Last.fm ${label} fetch failed (${res.status}) on page ${page}`);
       break;
     }
 
-    const data = (await res.json()) as { topartists: { artist: LastfmArtistRaw[]; "@attr": LastfmPageAttr } };
-    const { artist: artists, "@attr": attr } = data.topartists;
+    const data = (await res.json()) as Record<string, Record<string, unknown>>;
+    const section = data[responseKey];
+    const items = section[itemKey] as T[];
+    const attr = section["@attr"] as LastfmPageAttr;
 
-    results.push(...artists);
+    results.push(...items);
     totalPages = Number.parseInt(attr.totalPages, 10);
 
     const pct = Math.round((page / totalPages) * 100);
-    process.stdout.write(`  Page ${page}/${totalPages} (${pct}%) — ${results.length} artists so far\r`);
+    process.stdout.write(
+      `  Page ${page}/${totalPages} (${pct}%) — ${results.length} ${label} so far\r`,
+    );
 
     page++;
     if (page <= totalPages) await sleep(LASTFM_CONFIG.DELAY_MS);
   } while (page <= totalPages);
 
-  console.log(`\n  Done. Fetched ${results.length} artists total.`);
+  console.log(`\n  Done. Fetched ${results.length} ${label} total.`);
   return results;
 }
 
-async function fetchTopAlbums(apiKey: string): Promise<LastfmAlbumRaw[]> {
-  const results: LastfmAlbumRaw[] = [];
-  let page = 1;
-  let totalPages = 1;
+function fetchTopArtists(apiKey: string): Promise<LastfmArtistRaw[]> {
+  return fetchTopItems<LastfmArtistRaw>(
+    apiKey,
+    "user.getTopArtists",
+    "topartists",
+    "artist",
+    "artists",
+  );
+}
 
-  console.log("\nFetching top albums from Last.fm...");
-
-  do {
-    const url = `${LASTFM_CONFIG.API_BASE}/?method=user.getTopAlbums&user=${LASTFM_CONFIG.USER}&api_key=${apiKey}&format=json&limit=${LASTFM_CONFIG.LIMIT}&page=${page}&period=overall`;
-    const res = await fetch(url, { headers: { "User-Agent": "MusicLibraryBrowser/1.0" } });
-
-    if (!res.ok) {
-      console.error(`  Last.fm album fetch failed (${res.status}) on page ${page}`);
-      break;
-    }
-
-    const data = (await res.json()) as { topalbums: { album: LastfmAlbumRaw[]; "@attr": LastfmPageAttr } };
-    const { album: albums, "@attr": attr } = data.topalbums;
-
-    results.push(...albums);
-    totalPages = Number.parseInt(attr.totalPages, 10);
-
-    const pct = Math.round((page / totalPages) * 100);
-    process.stdout.write(`  Page ${page}/${totalPages} (${pct}%) — ${results.length} albums so far\r`);
-
-    page++;
-    if (page <= totalPages) await sleep(LASTFM_CONFIG.DELAY_MS);
-  } while (page <= totalPages);
-
-  console.log(`\n  Done. Fetched ${results.length} albums total.`);
-  return results;
+function fetchTopAlbums(apiKey: string): Promise<LastfmAlbumRaw[]> {
+  return fetchTopItems<LastfmAlbumRaw>(apiKey, "user.getTopAlbums", "topalbums", "album", "albums");
 }
 
 // ─── Music Library Lookup Maps ────────────────────────────────────────────────
@@ -163,7 +142,7 @@ function buildLookupMaps(library: MusicLibrary): {
     albumMap.set(artist.slug, albums);
   }
 
-  function processSubgenre(sg: { artists: Artist[]; subgenres: typeof sg[] }) {
+  function processSubgenre(sg: { artists: Artist[]; subgenres: (typeof sg)[] }) {
     sg.artists.forEach(processArtist);
     sg.subgenres.forEach(processSubgenre);
   }
@@ -218,7 +197,6 @@ async function main() {
     if (slug) {
       artists[slug] = {
         playcount: Number.parseInt(raw.playcount, 10),
-        rank: Number.parseInt(raw["@attr"].rank, 10),
       };
       artistMatched++;
     } else {
@@ -277,7 +255,9 @@ async function main() {
   console.log(`\nManifest written to ${LASTFM_CONFIG.MANIFEST_PATH}`);
   console.log(`  Artists: ${Object.keys(artists).length}`);
   console.log(`  Artists with albums: ${Object.keys(albums).length}`);
-  console.log(`  Total album entries: ${Object.values(albums).reduce((s, a) => s + Object.keys(a).length, 0)}`);
+  console.log(
+    `  Total album entries: ${Object.values(albums).reduce((s, a) => s + Object.keys(a).length, 0)}`,
+  );
 }
 
 main().catch((err) => {

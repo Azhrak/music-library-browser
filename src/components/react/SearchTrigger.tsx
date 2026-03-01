@@ -20,7 +20,7 @@ export default function SearchTrigger() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 rounded-md border border-[#333] bg-[#1a1a1a] px-3 py-1.5 text-sm text-gray-400 transition-colors hover:border-[#555] hover:text-gray-300"
+        className="flex items-center gap-2 rounded-md border border-[#333] bg-surface-50 px-3 py-1.5 text-sm text-gray-400 transition-colors hover:border-[#555] hover:text-gray-300"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -39,7 +39,7 @@ export default function SearchTrigger() {
           />
         </svg>
         <span className="hidden sm:inline">Search</span>
-        <kbd className="hidden rounded bg-[#252525] px-1.5 py-0.5 text-xs text-gray-500 sm:inline">
+        <kbd className="hidden rounded bg-surface-100 px-1.5 py-0.5 text-xs text-gray-500 sm:inline">
           Ctrl+K
         </kbd>
       </button>

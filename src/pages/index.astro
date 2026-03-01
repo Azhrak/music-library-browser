@@ -2,24 +2,11 @@
 import Layout from '../components/astro/Layout.astro';
 import GenreList from '../components/react/GenreList';
 import { getLibrary, getGenreCounts } from '../lib/musicData';
-import { getArtistPlaycount } from '../lib/lastfm';
+import { getNodePlaycount } from '../lib/lastfm';
 import { Users, Album, Music } from '@lucide/astro';
-import type { Genre, Subgenre, Artist } from '../../scripts/types';
 
 const library = getLibrary();
 const stats = library.stats;
-
-function sumArtistPlays(artists: Artist[]): number {
-  let total = 0;
-  for (const a of artists) total += getArtistPlaycount(a.slug) ?? 0;
-  return total;
-}
-
-function getGenrePlaycount(node: Genre | Subgenre): number {
-  let total = sumArtistPlays(node.artists);
-  for (const child of node.subgenres) total += getGenrePlaycount(child);
-  return total;
-}
 
 const genreRows = library.genres.map((g) => {
   const counts = getGenreCounts(g);
@@ -29,7 +16,7 @@ const genreRows = library.genres.map((g) => {
     artistCount: counts.artists,
     albumCount: counts.albums,
     subgenreCount: g.subgenres.length,
-    plays: getGenrePlaycount(g),
+    plays: getNodePlaycount(g),
   };
 });
 

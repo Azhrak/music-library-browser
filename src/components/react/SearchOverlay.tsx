@@ -113,7 +113,7 @@ export default function SearchOverlay({ onClose }: Props) {
         if (e.key === "Escape") onClose();
       }}
     >
-      <div className="mx-3 w-full max-w-xl rounded-xl border border-[#333] bg-[#0f0f0f] shadow-2xl sm:mx-0">
+      <div className="mx-3 w-full max-w-xl rounded-xl border border-[#333] bg-surface shadow-2xl sm:mx-0">
         <div className="flex items-center border-b border-[#333] px-4">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -140,7 +140,7 @@ export default function SearchOverlay({ onClose }: Props) {
             placeholder="Search artists, albums, genres..."
             className="w-full bg-transparent px-3 py-4 text-gray-100 outline-hidden placeholder:text-gray-600"
           />
-          <kbd className="shrink-0 rounded bg-[#252525] px-2 py-1 text-xs text-gray-500">Esc</kbd>
+          <kbd className="shrink-0 rounded bg-surface-100 px-2 py-1 text-xs text-gray-500">Esc</kbd>
         </div>
 
         <div className="max-h-80 overflow-y-auto p-2">
@@ -167,7 +167,7 @@ export default function SearchOverlay({ onClose }: Props) {
               key={`${result.type}-${result.slug}-${index}`}
               href={result.url}
               className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-                index === selectedIndex ? "bg-[#252525]" : "hover:bg-[#1a1a1a]"
+                index === selectedIndex ? "bg-surface-100" : "hover:bg-surface-50"
               }`}
               onMouseEnter={() => setSelectedIndex(index)}
             >

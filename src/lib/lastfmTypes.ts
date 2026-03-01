@@ -1,6 +1,5 @@
 export interface LastfmArtistEntry {
   playcount: number;
-  rank: number;
 }
 
 export interface LastfmAlbumEntry {
