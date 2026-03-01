@@ -2,7 +2,8 @@
 import Layout from '../../components/astro/Layout.astro';
 import Breadcrumb from '../../components/astro/Breadcrumb.astro';
 import ArtistList from '../../components/react/ArtistList';
-import { Music, Layers, Users, Disc3, Archive } from '@lucide/astro';
+import GenreList from '../../components/react/GenreList';
+import { Layers, Users, Disc3, Archive } from '@lucide/astro';
 import type { Subgenre } from '../../../scripts/types';
 import { getGenres, getSubgenreCounts } from '../../lib/musicData';
 import { getArtistPlaycount } from '../../lib/lastfm';
@@ -95,6 +96,25 @@ for (const a of artists) {
   if (pc !== null) playcounts[a.slug] = pc;
 }
 
+function getSubgenrePlaycount(sg: Subgenre): number {
+  let total = 0;
+  for (const a of sg.artists) total += getArtistPlaycount(a.slug) ?? 0;
+  for (const child of sg.subgenres) total += getSubgenrePlaycount(child);
+  return total;
+}
+
+const subgenreRows = subgenres.map((sg) => {
+  const counts = getSubgenreCounts(sg);
+  return {
+    name: sg.name,
+    href: `/genre/${sg.fullPath.map((p) => slugify(p)).join('/')}`,
+    artistCount: counts.artists,
+    albumCount: counts.albums,
+    plays: getSubgenrePlaycount(sg),
+  };
+});
+const subgenreHasPlaycounts = subgenreRows.some((r) => r.plays > 0);
+
 const description = artists.length > 0
   ? `${name} — ${artists.length} artist${artists.length === 1 ? '' : 's'} in the Music Library.`
   : `${name} — ${subgenres.length} subgenre${subgenres.length === 1 ? '' : 's'} in the Music Library.`;
@@ -111,32 +131,7 @@ const description = artists.length > 0
         <Layers class="h-5 w-5 text-accent" />
         Subgenres
       </h2>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {subgenres
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .map((sg) => {
-            const counts = getSubgenreCounts(sg);
-            const href = `/genre/${sg.fullPath.map((p) => slugify(p)).join('/')}`;
-            return (
-              <a
-                href={href}
-                class="group block rounded-lg border border-surface-200 bg-surface-50 p-4 transition-all hover:border-accent/50 hover:bg-surface-100"
-              >
-                <div class="flex items-start gap-2">
-                  <Music class="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                  <div class="min-w-0">
-                    <h3 class="font-medium text-gray-100 group-hover:text-accent-light transition-colors">
-                      {sg.name}
-                    </h3>
-                    <div class="mt-1 text-sm text-gray-400">
-                      {counts.artists} artists &middot; {counts.albums} albums
-                    </div>
-                  </div>
-                </div>
-              </a>
-            );
-          })}
-      </div>
+      <GenreList genres={subgenreRows} hasPlaycounts={subgenreHasPlaycounts} compact={true} client:load />
     </section>
   )}
 

@@ -1,12 +1,39 @@
 ---
 import Layout from '../components/astro/Layout.astro';
-import GenreCard from '../components/astro/GenreCard.astro';
-import { getLibrary } from '../lib/musicData';
+import GenreList from '../components/react/GenreList';
+import { getLibrary, getGenreCounts } from '../lib/musicData';
+import { getArtistPlaycount } from '../lib/lastfm';
 import { Users, Album, Music } from '@lucide/astro';
+import type { Genre, Subgenre, Artist } from '../../scripts/types';
 
 const library = getLibrary();
-const genres = library.genres;
 const stats = library.stats;
+
+function sumArtistPlays(artists: Artist[]): number {
+  let total = 0;
+  for (const a of artists) total += getArtistPlaycount(a.slug) ?? 0;
+  return total;
+}
+
+function getGenrePlaycount(node: Genre | Subgenre): number {
+  let total = sumArtistPlays(node.artists);
+  for (const child of node.subgenres) total += getGenrePlaycount(child);
+  return total;
+}
+
+const genreRows = library.genres.map((g) => {
+  const counts = getGenreCounts(g);
+  return {
+    name: g.name,
+    href: `/genre/${g.slug}`,
+    artistCount: counts.artists,
+    albumCount: counts.albums,
+    subgenreCount: g.subgenres.length,
+    plays: getGenrePlaycount(g),
+  };
+});
+
+const hasPlaycounts = genreRows.some((g) => g.plays > 0);
 ---
 
 <Layout
@@ -43,7 +70,5 @@ const stats = library.stats;
     </div>
   </div>
 
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-    {genres.map((genre) => <GenreCard genre={genre} />)}
-  </div>
+  <GenreList genres={genreRows} hasPlaycounts={hasPlaycounts} client:load />
 </Layout>
