@@ -1,10 +1,11 @@
 ---
 import Layout from '../../components/astro/Layout.astro';
 import Breadcrumb from '../../components/astro/Breadcrumb.astro';
-import ArtistCard from '../../components/astro/ArtistCard.astro';
+import ArtistList from '../../components/react/ArtistList';
 import { Music, Layers, Users, Disc3, Archive } from '@lucide/astro';
 import type { Subgenre } from '../../../scripts/types';
 import { getGenres, getSubgenreCounts } from '../../lib/musicData';
+import { getArtistPlaycount } from '../../lib/lastfm';
 import { slugify } from '../../lib/slugify';
 
 interface PathEntry {
@@ -79,10 +80,20 @@ export function getStaticPaths(): PathEntry[] {
 
 const { name, breadcrumb, subgenres, artists, compilations } = Astro.props;
 
-// Sort artists alphabetically
-const sortedArtists = [...artists].sort((a, b) =>
-  a.name.localeCompare(b.name)
-);
+const artistRows = artists.map((a) => ({
+  name: a.name,
+  slug: a.slug,
+  country: a.country,
+  isoCodes: a.isoCodes,
+  tags: a.tags,
+  albumCount: a.albums.length,
+}));
+
+const playcounts: Record<string, number> = {};
+for (const a of artists) {
+  const pc = getArtistPlaycount(a.slug);
+  if (pc !== null) playcounts[a.slug] = pc;
+}
 
 const description = artists.length > 0
   ? `${name} — ${artists.length} artist${artists.length === 1 ? '' : 's'} in the Music Library.`
@@ -129,17 +140,13 @@ const description = artists.length > 0
     </section>
   )}
 
-  {sortedArtists.length > 0 && (
+  {artistRows.length > 0 && (
     <section class="mb-8">
       <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-300">
         <Users class="h-5 w-5 text-accent" />
-        Artists ({sortedArtists.length})
+        Artists ({artistRows.length})
       </h2>
-      <div class="grid grid-cols-1 gap-2">
-        {sortedArtists.map((artist) => (
-          <ArtistCard artist={artist} />
-        ))}
-      </div>
+      <ArtistList artists={artistRows} playcounts={playcounts} client:load />
     </section>
   )}
 
