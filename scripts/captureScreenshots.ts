@@ -1,9 +1,9 @@
-import { execSync, spawn, type ChildProcess } from "node:child_process";
+import { type ChildProcess, execSync, spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { chromium, type Browser, type Page } from "playwright";
-import type { Artist, Genre, MusicLibrary, Subgenre } from "./types.js";
+import { chromium, type Page } from "playwright";
+import type { Genre, MusicLibrary, Subgenre } from "./types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
@@ -60,13 +60,21 @@ function discoverPages(): PageConfig[] {
     // Pick a subgenre that has artists — build slug path by walking the tree
     const match = findSubgenreWithArtists(genre);
     if (match) {
-      pages.push({ name: "subgenre", path: `/genre/${match.slugPath}`, fullPage: true });
+      pages.push({
+        name: "subgenre",
+        path: `/genre/${match.slugPath}`,
+        fullPage: true,
+      });
 
       // Pick an artist with multiple albums from this subgenre
       const artist =
         [...match.subgenre.artists].sort((a, b) => b.albums.length - a.albums.length)[0] ?? null;
       if (artist) {
-        pages.push({ name: "artist", path: `/artist/${artist.slug}`, fullPage: true });
+        pages.push({
+          name: "artist",
+          path: `/artist/${artist.slug}`,
+          fullPage: true,
+        });
 
         // Pick an album
         if (artist.albums.length > 0) {
@@ -91,15 +99,15 @@ function findSubgenreWithArtists(genre: Genre): SubgenreMatch | null {
     if (nested) return nested;
   }
   if (genre.subgenres[0]) {
-    return { subgenre: genre.subgenres[0], slugPath: `${genre.slug}/${genre.subgenres[0].slug}` };
+    return {
+      subgenre: genre.subgenres[0],
+      slugPath: `${genre.slug}/${genre.subgenres[0].slug}`,
+    };
   }
   return null;
 }
 
-function findNestedSubgenreWithArtists(
-  sg: Subgenre,
-  parentSlugPath: string,
-): SubgenreMatch | null {
+function findNestedSubgenreWithArtists(sg: Subgenre, parentSlugPath: string): SubgenreMatch | null {
   for (const child of sg.subgenres) {
     const slugPath = `${parentSlugPath}/${child.slug}`;
     if (child.artists.length >= 3) return { subgenre: child, slugPath };
@@ -167,11 +175,7 @@ function stopServer(server: ChildProcess): void {
 
 // ─── Screenshot capture ─────────────────────────────────────────────────
 
-async function captureSearchOverlay(
-  page: Page,
-  baseUrl: string,
-  dir: string,
-): Promise<void> {
+async function captureSearchOverlay(page: Page, baseUrl: string, dir: string): Promise<void> {
   await page.goto(baseUrl, { waitUntil: "networkidle" });
 
   // Click the search trigger button
@@ -179,7 +183,7 @@ async function captureSearchOverlay(
 
   // Wait for dialog to appear
   try {
-    await page.waitForSelector("[role=\"dialog\"]", { timeout: 5000 });
+    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
   } catch {
     console.warn("    Search overlay did not appear, skipping");
     return;
@@ -194,7 +198,7 @@ async function captureSearchOverlay(
   });
 
   // Type a query
-  const input = page.locator("[role=\"dialog\"] input");
+  const input = page.locator('[role="dialog"] input');
   await input.fill("metal");
   await page.waitForTimeout(500);
 
@@ -219,9 +223,7 @@ async function captureAllScreenshots(baseUrl: string, pages: PageConfig[]): Prom
       const viewportDir = path.join(SCREENSHOTS_DIR, viewport.name);
       fs.mkdirSync(viewportDir, { recursive: true });
 
-      console.log(
-        `\n── Viewport: ${viewport.name} (${viewport.width}x${viewport.height}) ──`,
-      );
+      console.log(`\n── Viewport: ${viewport.name} (${viewport.width}x${viewport.height}) ──`);
 
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },

@@ -33,9 +33,16 @@ const breadcrumb = [
 ];
 
 const albums = artist.albums;
+
+const description = [
+  artist.name,
+  artist.country ? `(${artist.country})` : null,
+  `— ${albums.length} ${albums.length === 1 ? 'release' : 'releases'}.`,
+  `${artist.genrePath.join(' > ')} on Music Library.`,
+].filter(Boolean).join(' ');
 ---
 
-<Layout title={artist.name}>
+<Layout title={artist.name} description={description}>
   <Breadcrumb items={breadcrumb} />
 
   <div class="mb-8">

@@ -62,9 +62,16 @@ const typeIcons: Record<string, any> = {
 };
 
 const TypeIcon = typeIcons[album.type] ?? typeIcons.other;
+
+const description = [
+  album.name,
+  `by ${artist.name}`,
+  album.year ? `(${album.year}).` : '.',
+  `${artist.genrePath.join(' > ')} on Music Library.`,
+].join(' ');
 ---
 
-<Layout title={`${album.name} - ${artist.name}`}>
+<Layout title={`${album.name} - ${artist.name}`} description={description} ogImage={artUrl}>
   <Breadcrumb items={breadcrumb} />
 
   <div class="mb-4">

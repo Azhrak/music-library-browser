@@ -4,10 +4,18 @@ import '../../styles/global.css';
 
 interface Props {
   title: string;
+  description: string;
+  ogImage?: string | null;
 }
 
-const { title } = Astro.props;
+const { title, description, ogImage } = Astro.props;
 const fullTitle = title === 'Music Library' ? title : `${title} - Music Library`;
+
+const canonicalUrl = Astro.url.href;
+const siteOrigin = Astro.site?.origin ?? 'https://music-library.azhrak.dev';
+const resolvedOgImage = ogImage
+  ? (ogImage.startsWith('http') ? ogImage : `${siteOrigin}${ogImage}`)
+  : `${siteOrigin}/images/music-library-browser-logo.png`;
 ---
 
 <!doctype html>
@@ -17,6 +25,26 @@ const fullTitle = title === 'Music Library' ? title : `${title} - Music Library`
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Favicon -->
+    <link rel="icon" href="/images/music-library-browser-logo-64x64.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/images/music-library-browser-logo.png" />
+
+    <!-- OpenGraph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={resolvedOgImage} />
+    <meta property="og:site_name" content="Music Library" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={resolvedOgImage} />
   </head>
   <body class="min-h-screen bg-surface text-gray-100">
     <Header />

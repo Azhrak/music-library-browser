@@ -9,7 +9,10 @@ const genres = library.genres;
 const stats = library.stats;
 ---
 
-<Layout title="Music Library">
+<Layout
+  title="Music Library"
+  description={`A personal music library browser — ${stats.totalArtists.toLocaleString()} artists and ${stats.totalAlbums.toLocaleString()} albums across ${stats.totalGenres} genres.`}
+>
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-100">Music Library</h1>
     <div class="mt-4 flex flex-wrap gap-6 text-gray-400">

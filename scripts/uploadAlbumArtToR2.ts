@@ -107,7 +107,9 @@ async function uploadAll(config: R2Config, jobs: UploadJob[]): Promise<void> {
           await uploadJob(config, job);
           done++;
           if (done % 100 === 0 || done === total) {
-            process.stdout.write(`\r  ${done}/${total} uploaded${failed ? ` (${failed} failed)` : ""}   `);
+            process.stdout.write(
+              `\r  ${done}/${total} uploaded${failed ? ` (${failed} failed)` : ""}   `,
+            );
           }
         } catch (err) {
           failed++;

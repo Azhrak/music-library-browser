@@ -83,9 +83,13 @@ const { name, breadcrumb, subgenres, artists, compilations } = Astro.props;
 const sortedArtists = [...artists].sort((a, b) =>
   a.name.localeCompare(b.name)
 );
+
+const description = artists.length > 0
+  ? `${name} — ${artists.length} artist${artists.length === 1 ? '' : 's'} in the Music Library.`
+  : `${name} — ${subgenres.length} subgenre${subgenres.length === 1 ? '' : 's'} in the Music Library.`;
 ---
 
-<Layout title={name}>
+<Layout title={name} description={description}>
   <Breadcrumb items={breadcrumb} />
 
   <h1 class="mb-6 text-2xl font-bold text-gray-100">{name}</h1>
