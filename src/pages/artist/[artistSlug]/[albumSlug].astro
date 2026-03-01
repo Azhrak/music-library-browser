@@ -5,10 +5,11 @@ import AlbumArtImage from '../../../components/astro/AlbumArtImage.astro';
 import CountryFlag from '../../../components/astro/CountryFlag.astro';
 import ExternalLinks from '../../../components/astro/ExternalLinks.astro';
 import TrackList from '../../../components/astro/TrackList.astro';
-import { Album as AlbumIcon, Disc3, Music, PenTool, Mic, Archive, GitBranch, Package, ArrowLeft } from '@lucide/astro';
+import { Album as AlbumIcon, Disc3, Music, PenTool, Mic, Archive, GitBranch, Package, ArrowLeft, Headphones } from '@lucide/astro';
 import { getAllArtists } from '../../../lib/musicData';
 import { getAlbumArtUrl } from '../../../lib/albumArt';
 import { getSpotifyAlbumData } from '../../../lib/spotifyAlbums';
+import { getAlbumPlaycount } from '../../../lib/lastfm';
 import { slugify } from '../../../lib/slugify';
 import { getTypeColor } from '../../../lib/albumTypeStyles';
 
@@ -35,6 +36,7 @@ export function getStaticPaths() {
 const { artist, album } = Astro.props;
 const artUrl = getAlbumArtUrl(artist.slug, album.slug);
 const spotifyAlbumData = getSpotifyAlbumData(artist.slug, album.slug);
+const albumPlaycount = getAlbumPlaycount(artist.slug, album.slug);
 
 const genreHref = `/genre/${artist.genrePath.map((p) => slugify(p)).join('/')}`;
 const genreLabel = artist.genrePath.join(' > ');
@@ -133,6 +135,12 @@ const description = [
         )}
         {album.hasMultipleDiscs && (
           <span class="text-sm text-gray-500">{album.discCount} discs</span>
+        )}
+        {albumPlaycount !== null && (
+          <span class="flex items-center gap-1 text-sm text-gray-500">
+            <Headphones class="h-4 w-4" />
+            <span>{albumPlaycount.toLocaleString()} scrobbles</span>
+          </span>
         )}
       </div>
 

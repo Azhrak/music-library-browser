@@ -7,6 +7,7 @@
     "art": "tsx scripts/processAlbumArt.ts",
     "spotify": "tsx scripts/spotify/fetchSpotifyArtists.ts",
     "spotify-albums": "tsx scripts/spotify/fetchSpotifyAlbums.ts",
+    "lastfm": "tsx scripts/lastfm/fetchLastfmData.ts",
     "dev": "pnpm parse && astro dev",
     "build": "pnpm parse && astro build",
     "upload-art": "tsx scripts/uploadAlbumArtToR2.ts",

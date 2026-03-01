@@ -1,11 +1,13 @@
 ---
 import Layout from '../../components/astro/Layout.astro';
+import { Headphones } from '@lucide/astro';
 import Breadcrumb from '../../components/astro/Breadcrumb.astro';
 import AlbumSection from '../../components/astro/AlbumSection.astro';
 import CountryFlag from '../../components/astro/CountryFlag.astro';
 import ExternalLinks from '../../components/astro/ExternalLinks.astro';
 import { getAllArtists } from '../../lib/musicData';
 import { getSpotifyArtistUrl } from '../../lib/spotify';
+import { getArtistPlaycount } from '../../lib/lastfm';
 import { slugify } from '../../lib/slugify';
 import { albumTypeSections } from '../../lib/albumTypeStyles';
 
@@ -20,6 +22,7 @@ export function getStaticPaths() {
 
 const { artist } = Astro.props;
 const spotifyDirectUrl = getSpotifyArtistUrl(artist.slug);
+const artistPlaycount = getArtistPlaycount(artist.slug);
 
 const genreHref = `/genre/${artist.genrePath.map((p) => slugify(p)).join('/')}`;
 const genreLabel = artist.genrePath.join(' > ');
@@ -80,6 +83,19 @@ const description = [
         </span>
       )}
     </p>
+    {artistPlaycount !== null && (
+      <p class="mt-1 flex items-center gap-1.5 text-sm text-gray-500">
+        <Headphones class="h-4 w-4" />
+        <a
+          href={`https://www.last.fm/user/azhrak/library/music/${encodeURIComponent(artist.name)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:text-accent-light transition-colors"
+        >
+          {artistPlaycount.toLocaleString()} scrobbles
+        </a>
+      </p>
+    )}
   </div>
 
   {albumTypeSections.map((type) => {
