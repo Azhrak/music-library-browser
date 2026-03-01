@@ -1,0 +1,13 @@
+{
+  "name": "Music Library",
+  "short_name": "Music Library",
+  "description": "Personal music library browser",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#6366f1",
+  "icons": [
+    { "src": "/images/music-library-browser-logo-64x64.png", "sizes": "64x64", "type": "image/png" },
+    { "src": "/images/music-library-browser-logo.png", "sizes": "any", "type": "image/png" }
+  ]
+}

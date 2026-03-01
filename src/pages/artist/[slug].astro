@@ -43,6 +43,14 @@ const description = [
 ---
 
 <Layout title={artist.name} description={description}>
+  <script is:inline type="application/ld+json" slot="head" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "MusicGroup",
+    "name": artist.name,
+    "url": `https://music-library.azhrak.dev/artist/${artist.slug}`,
+    "genre": artist.genrePath.join(' > '),
+    ...(artist.country ? { "foundingLocation": { "@type": "Place", "name": artist.country } } : {}),
+  })} />
   <Breadcrumb items={breadcrumb} />
 
   <div class="mb-8">

@@ -4,84 +4,12 @@ Audit of standard web features not yet present in the site, organized by priorit
 The site is a personal music library browser at https://music-library.azhrak.dev — **not intended for public indexing**.
 
 ---
-
-## Priority 1 — Social & SEO Basics
-
-These are missing from every page and have immediate visible impact when sharing links.
-
-### 1.1 Social meta tags
-**Status:** planned (see [social-meta-tags.md](social-meta-tags.md))
-
-Every page needs these in `<head>`:
-
-```html
-<!-- Description -->
-<meta name="description" content="..." />
-<link rel="canonical" href="https://music-library.azhrak.dev/..." />
-
-<!-- OpenGraph (iMessage, Discord, Slack, Facebook, LinkedIn) -->
-<meta property="og:type" content="website" />
-<meta property="og:url" content="..." />
-<meta property="og:title" content="..." />
-<meta property="og:description" content="..." />
-<meta property="og:image" content="https://..." />
-<meta property="og:site_name" content="Music Library" />
-
-<!-- Twitter / X Card -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="..." />
-<meta name="twitter:description" content="..." />
-<meta name="twitter:image" content="https://..." />
-```
-
-**Implementation:** extend `Layout.astro` with `description: string` and `ogImage?: string | null` props.
-OG image: album art from R2 on album pages; site logo everywhere else.
-Make relative paths absolute via `Astro.site.origin`.
-
-Per-page descriptions:
-| Page | Description pattern |
-|------|---------------------|
-| Homepage | "A personal music library browser — {N} artists and {N} albums across {N} genres." |
-| Genre/subgenre | "{Name} — {N} artists in the Music Library." / "{N} subgenres" if no direct artists |
-| Artist | "{Name} ({Country}) — {N} releases. {Genre path} on Music Library." |
-| Album | "{Album} by {Artist} ({Year}). {Genre path} on Music Library." + album art as og:image |
-
-**Files to touch:**
-- `src/components/astro/Layout.astro`
-- `src/pages/index.astro`
-- `src/pages/genre/[...path].astro`
-- `src/pages/artist/[slug].astro`
-- `src/pages/artist/[artistSlug]/[albumSlug].astro`
-
-### 1.2 Favicon & touch icons
-**Status:** planned
-
-Logo images exist at `public/images/`:
-- `music-library-browser-logo-64x64.png` — browser tab icon
-- `music-library-browser-logo.png` — apple-touch-icon (home screen)
-
-Add to `Layout.astro` `<head>`:
-```html
-<link rel="icon" href="/images/music-library-browser-logo-64x64.png" type="image/png" />
-<link rel="apple-touch-icon" href="/images/music-library-browser-logo.png" />
-```
-
-### 1.3 robots.txt — block all crawling
-**Status:** done (`public/robots.txt` exists)
-
-```
-User-agent: *
-Disallow: /
-```
-
-No sitemap link since the site is intentionally not indexed.
-
----
+## Priority 1 - DONE
 
 ## Priority 2 — Structure & User Experience
 
 ### 2.1 Custom 404 page
-**Status:** not started
+**Status:** done
 
 Astro serves a default 404 when a route isn't found. A custom page improves UX and keeps the site's visual style.
 
@@ -92,7 +20,7 @@ Create `src/pages/404.astro`:
 - Cloudflare Pages picks up `404.html` automatically from static output
 
 ### 2.2 JSON-LD structured data
-**Status:** not started
+**Status:** done
 
 Structured data gives search engines (and tools like Google Rich Results) machine-readable info about the content.
 Since the site blocks crawlers this is lower value, but good practice if crawling policy changes.
@@ -105,7 +33,7 @@ Schema types to use:
 Add as `<script type="application/ld+json">` inside `<head>` or via a dedicated `JsonLd.astro` component.
 
 ### 2.3 PWA manifest (`site.webmanifest`)
-**Status:** not started
+**Status:** done
 
 Enables "Add to Home Screen" on mobile and sets the browser chrome color.
 

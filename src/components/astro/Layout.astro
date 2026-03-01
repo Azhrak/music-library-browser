@@ -28,9 +28,11 @@ const resolvedOgImage = ogImage
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
 
-    <!-- Favicon -->
+    <!-- Favicon & PWA -->
     <link rel="icon" href="/images/music-library-browser-logo-64x64.png" type="image/png" />
     <link rel="apple-touch-icon" href="/images/music-library-browser-logo.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#6366f1" />
 
     <!-- OpenGraph -->
     <meta property="og:type" content="website" />
@@ -45,6 +47,8 @@ const resolvedOgImage = ogImage
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={resolvedOgImage} />
+
+    <slot name="head" />
   </head>
   <body class="min-h-screen bg-surface text-gray-100">
     <Header />

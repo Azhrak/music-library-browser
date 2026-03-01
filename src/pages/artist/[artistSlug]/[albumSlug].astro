@@ -72,6 +72,16 @@ const description = [
 ---
 
 <Layout title={`${album.name} - ${artist.name}`} description={description} ogImage={artUrl}>
+  <script is:inline type="application/ld+json" slot="head" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "MusicAlbum",
+    "name": album.name,
+    "url": `https://music-library.azhrak.dev/artist/${artist.slug}/${album.slug}`,
+    "byArtist": { "@type": "MusicGroup", "name": artist.name, "url": `https://music-library.azhrak.dev/artist/${artist.slug}` },
+    ...(album.year ? { "datePublished": String(album.year) } : {}),
+    ...(spotifyAlbumData?.tracks?.length ? { "numTracks": spotifyAlbumData.tracks.length } : {}),
+    "genre": artist.genrePath.join(' > '),
+  })} />
   <Breadcrumb items={breadcrumb} />
 
   <div class="mb-4">
