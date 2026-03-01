@@ -1,4 +1,4 @@
-import { Disc, Headphones, Mic } from "lucide-react";
+import { DiscAlbum, Headphones, Mic } from "lucide-react";
 import { useState } from "react";
 import CountryFlag from "./CountryFlag";
 
@@ -104,7 +104,7 @@ export default function ArtistList({ artists, playcounts }: Props) {
                   </span>
                 )}
                 <span className="flex items-center gap-1">
-                  <Disc className="h-4 w-4" aria-hidden="true" />
+                  <DiscAlbum className="h-4 w-4" aria-hidden="true" />
                   <span>
                     {artist.albumCount} {artist.albumCount === 1 ? "album" : "albums"}
                   </span>

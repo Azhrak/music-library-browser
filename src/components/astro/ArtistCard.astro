@@ -1,7 +1,7 @@
 ---
 import type { Artist } from '../../../scripts/types';
 import CountryFlag from './CountryFlag.astro';
-import { Mic, Album, Headphones } from '@lucide/astro';
+import { Mic, DiscAlbum, Headphones } from '@lucide/astro';
 import { getArtistPlaycount } from '../../lib/lastfm';
 
 interface Props {
@@ -41,7 +41,7 @@ const playcount = getArtistPlaycount(artist.slug);
       </span>
     )}
     <span class="flex items-center gap-1">
-      <Album class="h-4 w-4" />
+      <DiscAlbum class="h-4 w-4" />
       <span>{artist.albums.length} {artist.albums.length === 1 ? 'album' : 'albums'}</span>
     </span>
   </div>

@@ -1,7 +1,7 @@
 ---
 import type { Genre } from '../../../scripts/types';
 import { getGenreCounts } from '../../lib/musicData';
-import { Music, Users, Disc3, Layers } from '@lucide/astro';
+import { DiscAlbum, Layers, Music, Users } from '@lucide/astro';
 
 interface Props {
   genre: Genre;
@@ -27,7 +27,7 @@ const counts = getGenreCounts(genre);
           {counts.artists}
         </span>
         <span class="flex items-center gap-1">
-          <Disc3 class="h-4 w-4" />
+          <DiscAlbum class="h-4 w-4" />
           {counts.albums}
         </span>
         {genre.subgenres.length > 0 && (

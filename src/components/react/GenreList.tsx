@@ -1,4 +1,4 @@
-import { Disc3, Headphones, Layers, Music, Users } from "lucide-react";
+import { DiscAlbum, Headphones, Layers, Music, Users } from "lucide-react";
 import { useState } from "react";
 
 export interface GenreRow {
@@ -92,7 +92,7 @@ export default function GenreList({ genres, hasPlaycounts, compact = false }: Pr
                     {genre.artistCount}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Disc3 className="h-4 w-4" aria-hidden="true" />
+                    <DiscAlbum className="h-4 w-4" aria-hidden="true" />
                     {genre.albumCount}
                   </span>
                   {(genre.subgenreCount ?? 0) > 0 && (

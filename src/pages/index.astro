@@ -3,7 +3,7 @@ import Layout from '../components/astro/Layout.astro';
 import GenreList from '../components/react/GenreList';
 import { getLibrary, getGenreCounts } from '../lib/musicData';
 import { getNodePlaycount } from '../lib/lastfm';
-import { Users, Album, Music } from '@lucide/astro';
+import { Users, DiscAlbum, Music } from '@lucide/astro';
 
 const library = getLibrary();
 const stats = library.stats;
@@ -47,7 +47,7 @@ const hasPlaycounts = genreRows.some((g) => g.plays > 0);
         <span>{stats.totalArtists.toLocaleString()} artists</span>
       </div>
       <div class="flex items-center gap-2">
-        <Album class="h-5 w-5 text-accent" />
+        <DiscAlbum class="h-5 w-5 text-accent" />
         <span>{stats.totalAlbums.toLocaleString()} albums</span>
       </div>
       <div class="flex items-center gap-2">
