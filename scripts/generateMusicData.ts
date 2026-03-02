@@ -109,6 +109,7 @@ function formatReleaseName(releaseName: string): string {
     .replace(/\(Lossless\)/i, "")
     .replace(/- Lossless/i, "")
     .replace(/\(later\)/gi, "")
+    .replace(/\(middle\)/gi, "")
     .replace(/\(early\)/gi, "")
     .replace(/\(Demo\)/i, "")
     .replace(/\(Promo\)/i, "")

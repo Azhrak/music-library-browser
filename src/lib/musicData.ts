@@ -67,6 +67,13 @@ export function getArtistBySlug(slug: string): Artist | undefined {
 }
 
 /**
+ * Find other artists that share the same base name (e.g., "Artist (early)" ↔ "Artist (later)").
+ */
+export function getRelatedArtistVariants(artist: Artist): Artist[] {
+  return getAllArtists().filter((a) => a.name === artist.name && a.slug !== artist.slug);
+}
+
+/**
  * Count artists and albums in a node with artists[] and subgenres[] properties.
  */
 function countTree(node: { artists: Artist[]; subgenres: Subgenre[] }): {

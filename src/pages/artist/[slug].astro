@@ -5,7 +5,7 @@ import Breadcrumb from '../../components/astro/Breadcrumb.astro';
 import AlbumSection from '../../components/astro/AlbumSection.astro';
 import CountryFlag from '../../components/astro/CountryFlag.astro';
 import ExternalLinks from '../../components/astro/ExternalLinks.astro';
-import { getAllArtists } from '../../lib/musicData';
+import { getAllArtists, getRelatedArtistVariants } from '../../lib/musicData';
 import { getSpotifyArtistUrl } from '../../lib/spotify';
 import { getArtistPlaycount } from '../../lib/lastfm';
 import { slugify } from '../../lib/slugify';
@@ -21,6 +21,7 @@ export function getStaticPaths() {
 }
 
 const { artist } = Astro.props;
+const relatedVariants = getRelatedArtistVariants(artist);
 const spotifyDirectUrl = getSpotifyArtistUrl(artist.slug);
 const artistPlaycount = getArtistPlaycount(artist.slug);
 
@@ -67,6 +68,19 @@ const description = [
       )}
       {artist.tags.length > 0 && (
         <span class="text-sm text-gray-500">({artist.tags.join(', ')})</span>
+      )}
+      {relatedVariants.length > 0 && (
+        <span class="text-sm text-gray-500">
+          See also:
+          {relatedVariants.map((v, i) => (
+            <>
+              {i > 0 && ', '}
+              <a href={`/artist/${v.slug}`} class="text-accent-light hover:underline">
+                {v.tags.length > 0 ? `${v.name} (${v.tags.join(', ')})` : v.name}
+              </a>
+            </>
+          ))}
+        </span>
       )}
       <a href={genreHref} class="text-sm text-accent-light hover:underline">
         {genreLabel}
