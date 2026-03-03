@@ -1,6 +1,6 @@
 import Fuse from "fuse.js";
 import { useCallback, useEffect, useRef, useState } from "react";
-import CountryFlag from "./CountryFlag";
+import { CountryFlag } from "./CountryFlag";
 
 interface SearchEntry {
   type: "artist" | "album" | "genre";
@@ -19,7 +19,7 @@ interface Props {
   onClose: () => void;
 }
 
-export default function SearchOverlay({ onClose }: Props) {
+export function SearchOverlay({ onClose }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchEntry[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);

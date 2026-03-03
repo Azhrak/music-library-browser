@@ -1,8 +1,8 @@
 ---
 import Layout from '../../components/astro/Layout.astro';
 import Breadcrumb from '../../components/astro/Breadcrumb.astro';
-import ArtistList from '../../components/react/ArtistList';
-import GenreList from '../../components/react/GenreList';
+import { ArtistList } from '../../components/react/ArtistList';
+import { GenreList } from '../../components/react/GenreList';
 import { Layers, Users, Disc3, Archive } from '@lucide/astro';
 import type { Subgenre } from '../../../scripts/types';
 import { getGenres, getSubgenreCounts } from '../../lib/musicData';

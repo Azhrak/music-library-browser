@@ -6,7 +6,7 @@ interface CountryFlagProps {
   size?: number;
 }
 
-export default function CountryFlag({ isoCodes, country, size = 16 }: CountryFlagProps) {
+export function CountryFlag({ isoCodes, country, size = 16 }: CountryFlagProps) {
   if (isoCodes.length === 0) return null;
 
   return (

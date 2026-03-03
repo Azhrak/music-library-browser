@@ -18,24 +18,7 @@ interface Props {
   compact?: boolean;
 }
 
-function sortGenres(genres: GenreRow[], key: SortKey): GenreRow[] {
-  return [...genres].sort((a, b) => {
-    if (key === "name") return a.name.localeCompare(b.name);
-    if (key === "artists") {
-      if (a.artistCount !== b.artistCount) return b.artistCount - a.artistCount;
-      return a.name.localeCompare(b.name);
-    }
-    if (key === "albums") {
-      if (a.albumCount !== b.albumCount) return b.albumCount - a.albumCount;
-      return a.name.localeCompare(b.name);
-    }
-    // plays — descending, no-data at end
-    if (a.plays !== b.plays) return b.plays - a.plays;
-    return a.name.localeCompare(b.name);
-  });
-}
-
-export default function GenreList({ genres, hasPlaycounts, compact = false }: Props) {
+export function GenreList({ genres, hasPlaycounts, compact = false }: Props) {
   const [sort, setSort] = useState<SortKey>("name");
   const sorted = sortGenres(genres, sort);
 
@@ -115,4 +98,21 @@ export default function GenreList({ genres, hasPlaycounts, compact = false }: Pr
       </div>
     </div>
   );
+}
+
+function sortGenres(genres: GenreRow[], key: SortKey): GenreRow[] {
+  return [...genres].sort((a, b) => {
+    if (key === "name") return a.name.localeCompare(b.name);
+    if (key === "artists") {
+      if (a.artistCount !== b.artistCount) return b.artistCount - a.artistCount;
+      return a.name.localeCompare(b.name);
+    }
+    if (key === "albums") {
+      if (a.albumCount !== b.albumCount) return b.albumCount - a.albumCount;
+      return a.name.localeCompare(b.name);
+    }
+    // plays — descending, no-data at end
+    if (a.plays !== b.plays) return b.plays - a.plays;
+    return a.name.localeCompare(b.name);
+  });
 }

@@ -1,8 +1,8 @@
 import { DiscAlbum, Headphones, Mic } from "lucide-react";
 import { useMemo, useState } from "react";
-import CountryFlag from "./CountryFlag";
-import CountryPicker from "./CountryPicker";
-import YearPicker, { type YearSelection } from "./YearPicker";
+import { CountryFlag } from "./CountryFlag";
+import { CountryPicker } from "./CountryPicker";
+import { YearPicker, type YearSelection } from "./YearPicker";
 
 export interface ArtistRow {
   name: string;
@@ -21,49 +21,7 @@ interface Props {
   playcounts: Record<string, number>;
 }
 
-function sortArtists(
-  artists: ArtistRow[],
-  key: SortKey,
-  playcounts: Record<string, number>,
-): ArtistRow[] {
-  return [...artists].sort((a, b) => {
-    if (key === "name") {
-      return a.name.localeCompare(b.name);
-    }
-    if (key === "country") {
-      const ca = a.country ?? "";
-      const cb = b.country ?? "";
-      if (!ca && !cb) return a.name.localeCompare(b.name);
-      if (!ca) return 1;
-      if (!cb) return -1;
-      const cmp = ca.localeCompare(cb);
-      return cmp !== 0 ? cmp : a.name.localeCompare(b.name);
-    }
-    // plays — descending, no-data at end
-    const pa = playcounts[a.slug] ?? -1;
-    const pb = playcounts[b.slug] ?? -1;
-    if (pa === pb) return a.name.localeCompare(b.name);
-    return pb - pa;
-  });
-}
-
-function filterArtists(
-  artists: ArtistRow[],
-  country: string | null,
-  years: YearSelection,
-): ArtistRow[] {
-  return artists.filter((a) => {
-    if (country !== null && a.country !== country) return false;
-    if (years.type === "all") return true;
-    if (a.albumYears.length === 0) return false;
-    if (years.type === "year") return a.albumYears.includes(years.year);
-    if (years.type === "decade")
-      return a.albumYears.some((y) => Math.floor(y / 10) * 10 === years.decade);
-    return a.albumYears.some((y) => y >= years.from && y <= years.to);
-  });
-}
-
-export default function ArtistList({ artists, playcounts }: Props) {
+export function ArtistList({ artists, playcounts }: Props) {
   const [sort, setSort] = useState<SortKey>("name");
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
   const [yearFilter, setYearFilter] = useState<YearSelection>({ type: "all" });
@@ -212,4 +170,46 @@ export default function ArtistList({ artists, playcounts }: Props) {
       </div>
     </div>
   );
+}
+
+function sortArtists(
+  artists: ArtistRow[],
+  key: SortKey,
+  playcounts: Record<string, number>,
+): ArtistRow[] {
+  return [...artists].sort((a, b) => {
+    if (key === "name") {
+      return a.name.localeCompare(b.name);
+    }
+    if (key === "country") {
+      const ca = a.country ?? "";
+      const cb = b.country ?? "";
+      if (!ca && !cb) return a.name.localeCompare(b.name);
+      if (!ca) return 1;
+      if (!cb) return -1;
+      const cmp = ca.localeCompare(cb);
+      return cmp !== 0 ? cmp : a.name.localeCompare(b.name);
+    }
+    // plays — descending, no-data at end
+    const pa = playcounts[a.slug] ?? -1;
+    const pb = playcounts[b.slug] ?? -1;
+    if (pa === pb) return a.name.localeCompare(b.name);
+    return pb - pa;
+  });
+}
+
+function filterArtists(
+  artists: ArtistRow[],
+  country: string | null,
+  years: YearSelection,
+): ArtistRow[] {
+  return artists.filter((a) => {
+    if (country !== null && a.country !== country) return false;
+    if (years.type === "all") return true;
+    if (a.albumYears.length === 0) return false;
+    if (years.type === "year") return a.albumYears.includes(years.year);
+    if (years.type === "decade")
+      return a.albumYears.some((y) => Math.floor(y / 10) * 10 === years.decade);
+    return a.albumYears.some((y) => y >= years.from && y <= years.to);
+  });
 }

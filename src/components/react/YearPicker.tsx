@@ -13,14 +13,7 @@ interface Props {
   onChange: (v: YearSelection) => void;
 }
 
-function selectionLabel(v: YearSelection): string {
-  if (v.type === "all") return "All years";
-  if (v.type === "decade") return `${v.decade}s`;
-  if (v.type === "year") return String(v.year);
-  return `${v.from}–${v.to}`;
-}
-
-export default function YearPicker({ years, value, onChange }: Props) {
+export function YearPicker({ years, value, onChange }: Props) {
   const [open, setOpen] = useState(false);
   const [pendingFrom, setPendingFrom] = useState<number | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
@@ -153,4 +146,11 @@ export default function YearPicker({ years, value, onChange }: Props) {
       )}
     </div>
   );
+}
+
+function selectionLabel(v: YearSelection): string {
+  if (v.type === "all") return "All years";
+  if (v.type === "decade") return `${v.decade}s`;
+  if (v.type === "year") return String(v.year);
+  return `${v.from}–${v.to}`;
 }

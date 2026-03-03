@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import SearchOverlay from "./SearchOverlay";
+import { SearchOverlay } from "./SearchOverlay";
 
-export default function SearchTrigger() {
+export function SearchTrigger() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {

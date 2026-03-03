@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import CountryFlag from "./CountryFlag";
+import { CountryFlag } from "./CountryFlag";
 
 export interface CountryOption {
   country: string;
@@ -14,7 +14,7 @@ interface Props {
   onChange: (v: string | null) => void;
 }
 
-export default function CountryPicker({ countries, value, onChange }: Props) {
+export function CountryPicker({ countries, value, onChange }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
