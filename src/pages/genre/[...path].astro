@@ -88,6 +88,7 @@ const artistRows = artists.map((a) => ({
   isoCodes: a.isoCodes,
   tags: a.tags,
   albumCount: a.albums.length,
+  albumYears: a.albums.map((al) => al.year).filter((y): y is number => y !== null),
 }));
 
 const playcounts: Record<string, number> = {};

@@ -30,7 +30,6 @@ interface MBSearchResponse {
   releases: MBRelease[];
 }
 
-
 interface MBManifestEntry {
   mbid: string | null; // null = queried but no match / no art
   hasArt: boolean;
@@ -50,7 +49,10 @@ interface ArtManifest {
   totalAlbums: number;
   albumsWithArt: number;
   albumsWithoutArt: number;
-  entries: Record<string, Record<string, { artistSlug: string; albumSlug: string; sourceFile: string }>>;
+  entries: Record<
+    string,
+    Record<string, { artistSlug: string; albumSlug: string; sourceFile: string }>
+  >;
 }
 
 interface Job {
@@ -238,7 +240,14 @@ function loadArtManifest(): ArtManifest {
       return JSON.parse(fs.readFileSync(p, "utf-8"));
     } catch {}
   }
-  return { generatedAt: "", musicLibraryRoot: "", totalAlbums: 0, albumsWithArt: 0, albumsWithoutArt: 0, entries: {} };
+  return {
+    generatedAt: "",
+    musicLibraryRoot: "",
+    totalAlbums: 0,
+    albumsWithArt: 0,
+    albumsWithoutArt: 0,
+    entries: {},
+  };
 }
 
 function saveArtManifest(manifest: ArtManifest): void {
@@ -268,7 +277,9 @@ async function main() {
   const mbManifest = loadMBManifest();
 
   if (Object.keys(mbManifest.entries).length > 0) {
-    console.log(`Loaded existing MusicBrainz manifest (${mbManifest.totalQueried} albums queried).`);
+    console.log(
+      `Loaded existing MusicBrainz manifest (${mbManifest.totalQueried} albums queried).`,
+    );
   }
 
   // Collect albums missing art that haven't been tried via MusicBrainz yet

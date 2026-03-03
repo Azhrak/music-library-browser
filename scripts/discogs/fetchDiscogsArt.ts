@@ -58,7 +58,10 @@ interface ArtManifest {
   totalAlbums: number;
   albumsWithArt: number;
   albumsWithoutArt: number;
-  entries: Record<string, Record<string, { artistSlug: string; albumSlug: string; sourceFile: string }>>;
+  entries: Record<
+    string,
+    Record<string, { artistSlug: string; albumSlug: string; sourceFile: string }>
+  >;
 }
 
 interface Job {
@@ -125,14 +128,20 @@ async function searchDiscogsWithYear(
 
   const localNorm = normalize(albumName);
 
-  interface Candidate { result: DiscogsSearchResult; score: number }
+  interface Candidate {
+    result: DiscogsSearchResult;
+    score: number;
+  }
   const candidates: Candidate[] = [];
 
   for (const r of result.data.results) {
-    const releaseName = r.title.includes(" - ") ? r.title.split(" - ").slice(1).join(" - ") : r.title;
+    const releaseName = r.title.includes(" - ")
+      ? r.title.split(" - ").slice(1).join(" - ")
+      : r.title;
     const relNorm = normalize(releaseName);
 
-    if (relNorm !== localNorm && !relNorm.includes(localNorm) && !localNorm.includes(relNorm)) continue;
+    if (relNorm !== localNorm && !relNorm.includes(localNorm) && !localNorm.includes(relNorm))
+      continue;
 
     let score = relNorm === localNorm ? 100 : 60;
 
@@ -196,7 +205,9 @@ async function downloadAndSaveArt(
 function loadDiscogsManifest(): DiscogsManifest {
   const p = path.join(ROOT, MANIFEST_PATH);
   if (fs.existsSync(p)) {
-    try { return JSON.parse(fs.readFileSync(p, "utf-8")); } catch {}
+    try {
+      return JSON.parse(fs.readFileSync(p, "utf-8"));
+    } catch {}
   }
   return { generatedAt: "", totalQueried: 0, totalWithArt: 0, entries: {} };
 }
@@ -221,9 +232,18 @@ function saveDiscogsManifest(manifest: DiscogsManifest): void {
 function loadArtManifest(): ArtManifest {
   const p = path.join(ROOT, ART_CONFIG.MANIFEST_PATH);
   if (fs.existsSync(p)) {
-    try { return JSON.parse(fs.readFileSync(p, "utf-8")); } catch {}
+    try {
+      return JSON.parse(fs.readFileSync(p, "utf-8"));
+    } catch {}
   }
-  return { generatedAt: "", musicLibraryRoot: "", totalAlbums: 0, albumsWithArt: 0, albumsWithoutArt: 0, entries: {} };
+  return {
+    generatedAt: "",
+    musicLibraryRoot: "",
+    totalAlbums: 0,
+    albumsWithArt: 0,
+    albumsWithoutArt: 0,
+    entries: {},
+  };
 }
 
 function saveArtManifest(manifest: ArtManifest): void {
@@ -273,7 +293,9 @@ async function main() {
   const discogsManifest = loadDiscogsManifest();
 
   if (discogsManifest.totalQueried > 0) {
-    console.log(`Loaded existing Discogs manifest (${discogsManifest.totalQueried} albums queried).`);
+    console.log(
+      `Loaded existing Discogs manifest (${discogsManifest.totalQueried} albums queried).`,
+    );
   }
 
   // Only process albums that: have no art AND haven't been tried via Discogs yet
@@ -319,7 +341,8 @@ async function main() {
       };
       notFound++;
       processed++;
-      if (processed % 100 === 0) checkpoint(discogsManifest, artManifest, processed, limited.length, found, notFound);
+      if (processed % 100 === 0)
+        checkpoint(discogsManifest, artManifest, processed, limited.length, found, notFound);
       continue;
     }
 
@@ -343,7 +366,8 @@ async function main() {
       };
       notFound++;
       processed++;
-      if (processed % 100 === 0) checkpoint(discogsManifest, artManifest, processed, limited.length, found, notFound);
+      if (processed % 100 === 0)
+        checkpoint(discogsManifest, artManifest, processed, limited.length, found, notFound);
       continue;
     }
 
@@ -371,7 +395,8 @@ async function main() {
     }
 
     processed++;
-    if (processed % 100 === 0) checkpoint(discogsManifest, artManifest, processed, limited.length, found, notFound);
+    if (processed % 100 === 0)
+      checkpoint(discogsManifest, artManifest, processed, limited.length, found, notFound);
   }
 
   saveDiscogsManifest(discogsManifest);

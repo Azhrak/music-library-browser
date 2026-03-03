@@ -112,7 +112,14 @@ function fetchTopArtists(apiKey: string, user: string): Promise<LastfmArtistRaw[
 }
 
 function fetchTopAlbums(apiKey: string, user: string): Promise<LastfmAlbumRaw[]> {
-  return fetchTopItems<LastfmAlbumRaw>(apiKey, user, "user.getTopAlbums", "topalbums", "album", "albums");
+  return fetchTopItems<LastfmAlbumRaw>(
+    apiKey,
+    user,
+    "user.getTopAlbums",
+    "topalbums",
+    "album",
+    "albums",
+  );
 }
 
 // ─── Music Library Lookup Maps ────────────────────────────────────────────────

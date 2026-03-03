@@ -18,6 +18,7 @@ export default function CountryFlag({ isoCodes, country, size = 16 }: CountryFla
           alt={country ?? iso.toUpperCase()}
           width={size}
           height={size}
+          style={{ width: size, height: size }}
           className="inline-block shrink-0 rounded-full"
           loading="lazy"
           decoding="async"
