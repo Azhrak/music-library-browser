@@ -8,18 +8,6 @@ interface Props {
   onMouseEnter: (index: number) => void;
 }
 
-const typeLabels: Record<string, string> = {
-  artist: "Artist",
-  album: "Album",
-  genre: "Genre",
-};
-
-const typeColors: Record<string, string> = {
-  artist: "text-indigo-400",
-  album: "text-emerald-400",
-  genre: "text-amber-400",
-};
-
 export function SearchResultItem({ result, index, selectedIndex, onMouseEnter }: Props) {
   return (
     <a
@@ -58,3 +46,15 @@ export function SearchResultItem({ result, index, selectedIndex, onMouseEnter }:
     </a>
   );
 }
+
+const typeLabels: Record<string, string> = {
+  artist: "Artist",
+  album: "Album",
+  genre: "Genre",
+};
+
+const typeColors: Record<string, string> = {
+  artist: "text-indigo-400",
+  album: "text-emerald-400",
+  genre: "text-amber-400",
+};
