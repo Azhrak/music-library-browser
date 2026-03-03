@@ -133,3 +133,8 @@ ALBUM_ART_BASE_URL=https://images.mlb.azhrak.dev
 - Shared types in `scripts/types.ts` (Genre, Subgenre, Artist, Album, ReleaseType)
 - Spotify types in `src/lib/spotifyTypes.ts`
 - ESM-only (`"type": "module"`)
+
+## Code Style
+
+- **No default exports** — always use named exports
+- **Component file layout** — the exported component function must be the first/topmost function in the file; local helper functions go at the bottom
