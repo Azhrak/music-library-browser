@@ -1,8 +1,8 @@
 ---
 import type { Album } from '../../../scripts/types';
-import { Album as AlbumIcon, Disc3, Music, PenTool, Mic, Archive, GitBranch, Package } from '@lucide/astro';
 import AlbumCard from './AlbumCard.astro';
 import { typeLabels } from '../../lib/albumTypeStyles';
+import { typeIcons } from '../../lib/albumTypeIcons';
 
 interface Props {
   albums: Album[];
@@ -13,17 +13,6 @@ interface Props {
 const { albums, type, artistSlug } = Astro.props;
 
 if (albums.length === 0) return;
-
-const typeIcons: Record<string, any> = {
-  album: AlbumIcon,
-  ep: Disc3,
-  single: Music,
-  demo: PenTool,
-  live: Mic,
-  compilation: Archive,
-  split: GitBranch,
-  other: Package,
-};
 
 const Icon = typeIcons[type] ?? typeIcons.other;
 const label = typeLabels[type] ?? 'Other';

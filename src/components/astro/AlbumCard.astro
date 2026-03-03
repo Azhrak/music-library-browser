@@ -1,9 +1,10 @@
 ---
 import type { Album } from '../../../scripts/types';
-import { Album as AlbumIcon, Disc3, Music, PenTool, Mic, Archive, GitBranch, Package, Headphones } from '@lucide/astro';
+import { Headphones } from '@lucide/astro';
 import AlbumArtImage from './AlbumArtImage.astro';
 import { getAlbumArtUrl } from '../../lib/albumArt';
 import { getTypeColor } from '../../lib/albumTypeStyles';
+import { typeIcons } from '../../lib/albumTypeIcons';
 import { getAlbumPlaycount } from '../../lib/lastfm';
 
 interface Props {
@@ -16,18 +17,6 @@ const artUrl = getAlbumArtUrl(artistSlug, album.slug);
 const playcount = getAlbumPlaycount(artistSlug, album.slug);
 
 const badgeClass = getTypeColor(album.type);
-
-const typeIcons: Record<string, any> = {
-  album: AlbumIcon,
-  ep: Disc3,
-  single: Music,
-  demo: PenTool,
-  live: Mic,
-  compilation: Archive,
-  split: GitBranch,
-  other: Package,
-};
-
 const TypeIcon = typeIcons[album.type] ?? typeIcons.other;
 ---
 
