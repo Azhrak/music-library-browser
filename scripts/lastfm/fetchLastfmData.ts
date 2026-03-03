@@ -1,5 +1,5 @@
 /**
- * Fetches all-time scrobble data from Last.fm for user "azhrak" and matches
+ * Fetches all-time scrobble data from Last.fm for the user set in LASTFM_USER and matches
  * it against the local music library (musicData.json) by artist/album slug.
  *
  * Output: data/generated/lastfmManifest.json
@@ -58,6 +58,7 @@ interface LastfmPageAttr {
 
 async function fetchTopItems<T>(
   apiKey: string,
+  user: string,
   method: string,
   responseKey: string,
   itemKey: string,
@@ -70,7 +71,7 @@ async function fetchTopItems<T>(
   console.log(`Fetching top ${label} from Last.fm...`);
 
   do {
-    const url = `${LASTFM_CONFIG.API_BASE}/?method=${method}&user=${LASTFM_CONFIG.USER}&api_key=${apiKey}&format=json&limit=${LASTFM_CONFIG.LIMIT}&page=${page}&period=overall`;
+    const url = `${LASTFM_CONFIG.API_BASE}/?method=${method}&user=${user}&api_key=${apiKey}&format=json&limit=${LASTFM_CONFIG.LIMIT}&page=${page}&period=overall`;
     const res = await fetch(url, { headers: { "User-Agent": "MusicLibraryBrowser/1.0" } });
 
     if (!res.ok) {
@@ -99,9 +100,10 @@ async function fetchTopItems<T>(
   return results;
 }
 
-function fetchTopArtists(apiKey: string): Promise<LastfmArtistRaw[]> {
+function fetchTopArtists(apiKey: string, user: string): Promise<LastfmArtistRaw[]> {
   return fetchTopItems<LastfmArtistRaw>(
     apiKey,
+    user,
     "user.getTopArtists",
     "topartists",
     "artist",
@@ -109,8 +111,8 @@ function fetchTopArtists(apiKey: string): Promise<LastfmArtistRaw[]> {
   );
 }
 
-function fetchTopAlbums(apiKey: string): Promise<LastfmAlbumRaw[]> {
-  return fetchTopItems<LastfmAlbumRaw>(apiKey, "user.getTopAlbums", "topalbums", "album", "albums");
+function fetchTopAlbums(apiKey: string, user: string): Promise<LastfmAlbumRaw[]> {
+  return fetchTopItems<LastfmAlbumRaw>(apiKey, user, "user.getTopAlbums", "topalbums", "album", "albums");
 }
 
 // ─── Music Library Lookup Maps ────────────────────────────────────────────────
@@ -165,6 +167,12 @@ async function main() {
     process.exit(1);
   }
 
+  const user = loadEnvVar("LASTFM_USER");
+  if (!user) {
+    console.error("LASTFM_USER must be set in .env or as an environment variable.");
+    process.exit(1);
+  }
+
   // Load music library data
   const musicDataPath = path.join(ROOT, "data/generated/musicData.json");
   if (!fs.existsSync(musicDataPath)) {
@@ -181,8 +189,8 @@ async function main() {
 
   // Fetch from Last.fm
   const [rawArtists, rawAlbums] = await Promise.all([
-    fetchTopArtists(apiKey),
-    fetchTopAlbums(apiKey),
+    fetchTopArtists(apiKey, user),
+    fetchTopAlbums(apiKey, user),
   ]);
 
   // Match artists
@@ -243,7 +251,7 @@ async function main() {
   // Write manifest
   const manifest: LastfmManifest = {
     generatedAt: new Date().toISOString(),
-    user: LASTFM_CONFIG.USER,
+    user,
     artists,
     albums,
   };
