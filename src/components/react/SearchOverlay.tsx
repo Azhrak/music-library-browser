@@ -1,6 +1,7 @@
 import Fuse from "fuse.js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CountryFlag } from "./CountryFlag";
+import { SearchIcon } from "./icons/SearchIcon";
 
 interface SearchEntry {
   type: "artist" | "album" | "genre";
@@ -115,22 +116,7 @@ export function SearchOverlay({ onClose }: Props) {
     >
       <div className="mx-3 w-full max-w-xl rounded-xl border border-[#333] bg-surface shadow-2xl sm:mx-0">
         <div className="flex items-center border-b border-[#333] px-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 shrink-0 text-gray-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-            role="img"
-            aria-label="Search"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          <SearchIcon className="h-5 w-5 shrink-0 text-gray-500" />
           <input
             ref={inputRef}
             type="text"
