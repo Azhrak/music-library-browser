@@ -1,6 +1,7 @@
 import { ChevronDown } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { CountryFlag } from "./CountryFlag";
+import { useClickOutside } from "./useClickOutside";
 
 export interface CountryOption {
   country: string;
@@ -18,16 +19,7 @@ export function CountryPicker({ countries, value, onChange }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    function onDown(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [open]);
+  useClickOutside(ref, () => setOpen(false), open);
 
   const selected = value ? countries.find((c) => c.country === value) : null;
   const active = value !== null;

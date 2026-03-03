@@ -1,5 +1,6 @@
 import { CalendarDays, ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useClickOutside } from "./useClickOutside";
 
 export type YearSelection =
   | { type: "all" }
@@ -19,17 +20,14 @@ export function YearPicker({ years, value, onChange }: Props) {
   const [hovered, setHovered] = useState<number | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    function onDown(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-        setPendingFrom(null);
-      }
-    }
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [open]);
+  useClickOutside(
+    ref,
+    () => {
+      setOpen(false);
+      setPendingFrom(null);
+    },
+    open,
+  );
 
   const yearSet = useMemo(() => new Set(years), [years]);
   const decades = useMemo(
