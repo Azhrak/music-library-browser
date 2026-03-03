@@ -1,60 +1,21 @@
-import Fuse from "fuse.js";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { CountryFlag } from "./CountryFlag";
-import { SearchIcon } from "./icons/SearchIcon";
-
-interface SearchEntry {
-  type: "artist" | "album" | "genre";
-  name: string;
-  artist?: string;
-  country?: string | null;
-  isoCodes?: string[];
-  year?: number | null;
-  genrePath: string;
-  slug: string;
-  url: string;
-  albumCount?: number;
-}
+import { useEffect, useRef } from "react";
+import { SearchInput } from "./search/SearchInput";
+import { SearchResults } from "./search/SearchResults";
+import { useSearch } from "./search/useSearch";
 
 interface Props {
   onClose: () => void;
 }
 
 export function SearchOverlay({ onClose }: Props) {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchEntry[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const fuseRef = useRef<Fuse<SearchEntry> | null>(null);
+  const { query, setQuery, results, selectedIndex, setSelectedIndex, loading, handleKeyDown } =
+    useSearch();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Load search index
-  useEffect(() => {
-    fetch("/searchIndex.json")
-      .then((r) => r.json())
-      .then((data: SearchEntry[]) => {
-        fuseRef.current = new Fuse(data, {
-          keys: [
-            { name: "name", weight: 2 },
-            { name: "artist", weight: 1.5 },
-            { name: "country", weight: 0.5 },
-            { name: "genrePath", weight: 0.5 },
-          ],
-          threshold: 0.3,
-          includeScore: true,
-          minMatchCharLength: 2,
-        });
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
-
-  // Focus input
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  // Close on Escape
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -62,45 +23,6 @@ export function SearchOverlay({ onClose }: Props) {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
-
-  // Search
-  useEffect(() => {
-    if (!fuseRef.current || query.length < 2) {
-      setResults([]);
-      setSelectedIndex(0);
-      return;
-    }
-    const searchResults = fuseRef.current.search(query, { limit: 30 }).map((r) => r.item);
-    setResults(searchResults);
-    setSelectedIndex(0);
-  }, [query]);
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIndex((prev) => Math.min(prev + 1, results.length - 1));
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIndex((prev) => Math.max(prev - 1, 0));
-      } else if (e.key === "Enter" && results[selectedIndex]) {
-        window.location.href = results[selectedIndex].url;
-      }
-    },
-    [results, selectedIndex],
-  );
-
-  const typeLabels: Record<string, string> = {
-    artist: "Artist",
-    album: "Album",
-    genre: "Genre",
-  };
-
-  const typeColors: Record<string, string> = {
-    artist: "text-indigo-400",
-    album: "text-emerald-400",
-    genre: "text-amber-400",
-  };
 
   return (
     <div
@@ -115,79 +37,19 @@ export function SearchOverlay({ onClose }: Props) {
       }}
     >
       <div className="mx-3 w-full max-w-xl rounded-xl border border-[#333] bg-surface shadow-2xl sm:mx-0">
-        <div className="flex items-center border-b border-[#333] px-4">
-          <SearchIcon className="h-5 w-5 shrink-0 text-gray-500" />
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Search artists, albums, genres..."
-            className="w-full bg-transparent px-3 py-4 text-gray-100 outline-hidden placeholder:text-gray-600"
-          />
-          <kbd className="shrink-0 rounded bg-surface-100 px-2 py-1 text-xs text-gray-500">Esc</kbd>
-        </div>
-
-        <div className="max-h-80 overflow-y-auto p-2">
-          {loading && (
-            <div className="px-4 py-8 text-center text-sm text-gray-500">
-              Loading search index...
-            </div>
-          )}
-
-          {!loading && query.length >= 2 && results.length === 0 && (
-            <div className="px-4 py-8 text-center text-sm text-gray-500">
-              No results found for &ldquo;{query}&rdquo;
-            </div>
-          )}
-
-          {!loading && query.length < 2 && (
-            <div className="px-4 py-8 text-center text-sm text-gray-500">
-              Type at least 2 characters to search
-            </div>
-          )}
-
-          {results.map((result, index) => (
-            <a
-              key={`${result.type}-${result.slug}-${index}`}
-              href={result.url}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-                index === selectedIndex ? "bg-surface-100" : "hover:bg-surface-50"
-              }`}
-              onMouseEnter={() => setSelectedIndex(index)}
-            >
-              <span
-                className={`shrink-0 text-xs font-medium ${typeColors[result.type] ?? "text-gray-500"}`}
-              >
-                {typeLabels[result.type] ?? result.type}
-              </span>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 text-sm text-gray-200">
-                  {result.type === "artist" && result.isoCodes && result.isoCodes.length > 0 && (
-                    <CountryFlag isoCodes={result.isoCodes} country={result.country} size={14} />
-                  )}
-                  <span className="truncate">{result.name}</span>
-                </div>
-                <div className="truncate text-xs text-gray-500">
-                  {result.type === "album" && result.artist && (
-                    <span>
-                      {result.artist}
-                      {result.year && ` (${result.year})`}
-                      {" \u00B7 "}
-                    </span>
-                  )}
-                  {result.genrePath}
-                </div>
-              </div>
-              {result.type === "artist" && result.albumCount && (
-                <span className="ml-auto shrink-0 text-xs text-gray-600">
-                  {result.albumCount} albums
-                </span>
-              )}
-            </a>
-          ))}
-        </div>
+        <SearchInput
+          value={query}
+          onChange={setQuery}
+          onKeyDown={handleKeyDown}
+          inputRef={inputRef}
+        />
+        <SearchResults
+          results={results}
+          selectedIndex={selectedIndex}
+          onMouseEnter={setSelectedIndex}
+          loading={loading}
+          query={query}
+        />
       </div>
     </div>
   );
