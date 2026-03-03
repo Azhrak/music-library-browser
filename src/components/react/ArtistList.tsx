@@ -1,11 +1,11 @@
 import { ArtistListControls } from "./artist-list/ArtistListControls";
 import { ArtistListItem } from "./artist-list/ArtistListItem";
-import { useArtistFilters } from "./artist-list/useArtistFilters";
+import { type ArtistRow, useArtistFilters } from "./artist-list/useArtistFilters";
 
 export type { ArtistRow } from "./artist-list/useArtistFilters";
 
 interface Props {
-  artists: import("./artist-list/useArtistFilters").ArtistRow[];
+  artists: ArtistRow[];
   playcounts: Record<string, number>;
 }
 
